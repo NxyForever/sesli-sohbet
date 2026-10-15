@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sesli Sohbet</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; margin-top: 50px; background-color: #1a1a2e; color: #fff; }
+        .container { background: #16213e; padding: 30px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; background: #0f3460; color: white; border: none; border-radius: 5px; margin-top: 15px; transition: 0.3s; }
+        button:hover { background: #e94560; }
+        #status { margin-top: 20px; font-weight: bold; color: #4caf50; font-size: 18px; }
+        input { width: 300px; padding: 10px; border-radius: 5px; border: none; outline: none; margin-top: 10px; text-align: center; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🎙️ WebRTC Sesli Sohbet</h1>
+        <p id="status">Sunucuya bağlanılıyor...</p>
+        
+        <div id="linkContainer" style="display: none;">
+            <p>Sohbeti başlatmak için bu linki kopyalayıp gönder:</p>
+            <input type="text" id="shareLink" readonly>
+            <br>
+            <button onclick="copyLink()">Link'i Kopyala</button>
+        </div>
+
+        <audio id="remoteAudio" autoplay></audio>
+    </div>
+
+    <script>
+        const peer = new Peer();
+        const urlParams = new URLSearchParams(window.location.search);
+        const peerIdToConnect = urlParams.get('join');
+
+        // Sunucuya bağlanıldığında
+        peer.on('open', (id) => {
+            if (peerIdToConnect) {
+                document.getElementById('status').innerText = "Odaya katılınıyor... Lütfen mikrofon izni verin.";
+                document.getElementById('status').style.color = "#ffeb3b";
+                startCall(peerIdToConnect);
+            } else {
+                const currentUrl = window.location.href.split('?')[0];
+                const shareableLink = `${currentUrl}?join=${id}`;
+                document.getElementById('shareLink').value = shareableLink;
+                document.getElementById('linkContainer').style.display = "block";
+                document.getElementById('status').innerText = "Oda oluşturuldu. Bekleniyor...";
+                document.getElementById('status').style.color = "#2196f3";
+            }
+        });
+
+        // Linke tıklayan kişi aradığında
+        peer.on('call', (call) => {
+            navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+                .then((stream) => {
+                    call.answer(stream); 
+                    call.on('stream', (remoteStream) => {
+                        document.getElementById('remoteAudio').srcObject = remoteStream;
+                        document.getElementById('status').innerText = "✅ Bağlantı kuruldu! Konuşabilirsiniz.";
+                        document.getElementById('status').style.color = "#4caf50";
+                    });
+                })
+                .catch((err) => { 
+                    alert("Sohbet edebilmek için mikrofon izni vermen gerekiyor!"); 
+                    document.getElementById('status').innerText = "❌ Mikrofon izni reddedildi.";
+                    document.getElementById('status').style.color = "#f44336";
+                });
+        });
+
+        // Aramayı başlatan fonksiyon
+        function startCall(remotePeerId) {
+            navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+                .then((stream) => {
+                    const call = peer.call(remotePeerId, stream); 
+                    call.on('stream', (remoteStream) => {
+                        document.getElementById('remoteAudio').srcObject = remoteStream;
+                        document.getElementById('status').innerText = "✅ Bağlantı kuruldu! Konuşabilirsiniz.";
+                        document.getElementById('status').style.color = "#4caf50";
+                    });
+                })
+                .catch((err) => { 
+                    alert("Sohbet edebilmek için mikrofon izni vermen gerekiyor!"); 
+                    document.getElementById('status').innerText = "❌ Mikrofon izni reddedildi.";
+                    document.getElementById('status').style.color = "#f44336";
+                });
+        }
+
+        function copyLink() {
+            const link = document.getElementById("shareLink");
+            link.select();
+            document.execCommand("copy");
+            alert("Link kopyalandı!");
+        }
+    </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nxy Sesli Sohbet</title>
+    <title>Nxy Sesli Sohbet | Mobil & Dijital</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap');
@@ -21,6 +21,8 @@
             overflow: hidden;
             background-image: radial-gradient(circle at center, #0f172a 0%, #060913 100%);
             padding: 15px;
+            user-select: none; /* Mobilde butona basılı tutarken metin seçimini engeller */
+            -webkit-user-select: none;
         }
 
         .hud-container {
@@ -93,6 +95,10 @@
         .btn-danger { border-color: #ff0055; color: #ff0055; }
         .btn-danger:active, .btn-danger:hover { background: rgba(255, 0, 85, 0.1); box-shadow: 0 0 15px rgba(255, 0, 85, 0.4); }
 
+        /* Yeni Mobil Bas-Konuş Butonu Stili (Turuncu Neon) */
+        .btn-ptt { border-color: #ffaa00; color: #ffaa00; margin-top: 5px;}
+        .btn-ptt.active-ptt { background: rgba(255, 170, 0, 0.2); box-shadow: 0 0 15px rgba(255, 170, 0, 0.6); color: #fff;}
+
         #status { font-size: 15px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; }
         
         .controls { display: none; margin-top: 15px; }
@@ -101,7 +107,7 @@
             width: 100%;
             height: 50px;
             background: rgba(0, 0, 0, 0.4);
-            border: 1px id #005577;
+            border: 1px solid #005577; /* Sınıf adı hatası düzeltildi: id -> solid */
             border-radius: 6px;
             margin-bottom: 15px;
             display: none;
@@ -133,7 +139,7 @@
 
     <div class="hud-container">
         <h1>NXY SESLİ</h1>
-        <p class="description">Mobil Uyumlu & Sesli Sohbet Ağı</p>
+        <p class="description">Mobil Uyumlu & Agresif Gürültü Filtreli Bağlantı Hub'ı</p>
         
         <div id="setupScreen">
             <input type="text" id="roomName" placeholder="ODA ADINI YAZIN" autocomplete="off">
@@ -147,9 +153,12 @@
             <p style="margin-bottom: 12px; font-size: 16px;">MİKROFON: <span id="micStatus" style="color: #0ff; text-shadow: 0 0 5px #0ff;">AKTİF</span></p>
             <button id="muteBtn" onclick="toggleMute()" class="btn-danger">Mikrofonu Kapat (M)</button>
             
+            <!-- YENİ MOBİL TELSİZ BUTONU -->
+            <button id="pttBtn" class="btn-ptt">TELSİZ (BASILI TUT)</button>
+            
             <div class="info-box">
                 <p>🎙️ <b>Gürültü Filtresi:</b> Aktif (300-3400Hz Bant Sınırlayıcı + Noise Gate)</p>
-                <p style="margin-top: 5px;">⌨️ <b>Masaüstü Kısayolları:</b></p>
+                <p style="margin-top: 5px;">⌨️ <b>Kısayollar:</b></p>
                 <p><span>[M]</span> Sustur | <span>[V]</span> Bas-Konuş</p>
             </div>
         </div>
@@ -169,6 +178,7 @@
         const statusEl = document.getElementById('status');
         const visualizer = document.getElementById('visualizer');
         const canvasCtx = visualizer.getContext('2d');
+        const pttBtn = document.getElementById('pttBtn'); // Yeni buton referansı eklendi
 
         function playSound(type) {
             try {
@@ -349,26 +359,53 @@
             }
         }
 
-        // Kısayollar (Sadece Masaüstünde Çalışır)
-        document.addEventListener('keydown', (e) => {
-            if(e.target.tagName === 'INPUT') return; 
-            if(e.code === 'KeyM') toggleMute();
-            if(e.code === 'KeyV' && isMuted && !isPttActive) {
+        // --- YENİ EKLENEN MOBİL DOKUNMATİK BAS-KONUŞ FONKSİYONLARI ---
+        function startPtt(e) {
+            if(e) e.preventDefault();
+            if(isMuted && !isPttActive && localStream) {
                 isPttActive = true;
                 localStream.getAudioTracks()[0].enabled = true;
                 playSound('on');
                 document.getElementById('micStatus').innerText = "KONUŞUYOR (V)";
-                document.getElementById('micStatus').style.color = "#ff00ff";
+                document.getElementById('micStatus').style.color = "#ffaa00";
+                pttBtn.classList.add("active-ptt");
             }
-        });
+        }
 
-        document.addEventListener('keyup', (e) => {
-            if(e.code === 'KeyV' && isMuted && isPttActive) {
+        function stopPtt(e) {
+            if(e) e.preventDefault();
+            if(isMuted && isPttActive && localStream) {
                 isPttActive = false;
                 localStream.getAudioTracks()[0].enabled = false;
                 playSound('off');
                 document.getElementById('micStatus').innerText = "KAPALI";
                 document.getElementById('micStatus').style.color = "#ff0055";
+                pttBtn.classList.remove("active-ptt");
+            }
+        }
+
+        // Telsiz Butonu Mobil (Dokunmatik) Kontrolleri
+        pttBtn.addEventListener('touchstart', startPtt, {passive: false});
+        pttBtn.addEventListener('touchend', stopPtt);
+        pttBtn.addEventListener('touchcancel', stopPtt);
+        
+        // Telsiz Butonu PC (Mouse) Kontrolleri
+        pttBtn.addEventListener('mousedown', startPtt);
+        window.addEventListener('mouseup', stopPtt);
+
+
+        // Kısayollar (Sadece Masaüstünde Çalışır)
+        document.addEventListener('keydown', (e) => {
+            if(e.target.tagName === 'INPUT') return; 
+            if(e.code === 'KeyM') toggleMute();
+            if(e.code === 'KeyV' && isMuted && !isPttActive) {
+                startPtt(); // Yeni eklenen fonksiyonu tetikler
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if(e.code === 'KeyV' && isMuted && isPttActive) {
+                stopPtt(); // Yeni eklenen fonksiyonu tetikler
             }
         });
     </script>

@@ -171,8 +171,16 @@
             } catch(e) {}
         }
 
+       // Gelişmiş Gürültü Engelleme ve Stüdyo Kalitesi Ayarları
         const audioConstraints = {
-            audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+            audio: {
+                echoCancellation: true,       // Yankı engelleme (Şart)
+                noiseSuppression: true,       // Gürültü engelleme (Şart)
+                autoGainControl: false,       // BOĞUKLUĞU YAPAN ANA SUÇLU! (Bunu kapattık)
+                sampleRate: 48000,            // Stüdyo kalitesinde ses frekansı (Discord kalitesi)
+                sampleSize: 16,               // 16-bit derinlik
+                channelCount: 2               // Stereo desteği
+            },
             video: false
         };
 

@@ -6,117 +6,111 @@
     <title>NXY SESLİ</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap');
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
         body { 
             font-family: 'Rajdhani', sans-serif; 
-            background: #040710; 
+            background: #060913; 
             color: #0ff; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
             min-height: 100vh;
             overflow: hidden;
-            background-image: radial-gradient(circle at center, #0a1128 0%, #040710 100%);
+            background-image: radial-gradient(circle at center, #0f172a 0%, #060913 100%);
             padding: 15px;
         }
 
+        /* Şeffaf Neon Kare Tasarım (Buzlu Cam Efekti) */
         .hud-container {
+            background: rgba(10, 15, 30, 0.4);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 255, 255, 0.15), inset 0 0 20px rgba(0, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding: 40px 25px;
             width: 100%;
-            max-width: 380px;
+            max-width: 400px;
             text-align: center;
-            position: relative;
-            padding: 40px 20px;
         }
 
         h1 {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 30px;
-            letter-spacing: 3px;
-            text-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
-            color: #e0ffff;
-        }
-
-        /* Siber Köşebentli Input ve Buton Tasarımı */
-        .cyber-box {
-            position: relative;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 26px;
             margin-bottom: 20px;
-            padding: 2px;
+            text-shadow: 0 0 10px #0ff;
+            letter-spacing: 2px;
         }
-
-        .cyber-box::before, .cyber-box::after {
-            content: ''; position: absolute; width: 20px; height: 10px; border: 2px solid #0ff;
-            box-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
-            pointer-events: none;
-        }
-        .cyber-box::before { top: 0; left: 0; border-right: 0; border-bottom: 0; }
-        .cyber-box::after { bottom: 0; right: 0; border-left: 0; border-top: 0; }
 
         input {
             width: 100%;
-            padding: 15px;
-            background: rgba(0, 20, 40, 0.4);
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            color: #0ff;
-            font-family: 'Rajdhani', sans-serif;
+            padding: 14px;
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
             font-size: 16px;
-            font-weight: 600;
+            border-radius: 8px;
             outline: none;
             text-align: center;
-            letter-spacing: 1px;
-            backdrop-filter: blur(5px);
+            margin-bottom: 20px;
+            transition: 0.3s;
         }
+        input:focus { border-color: #0ff; box-shadow: 0 0 15px rgba(0, 255, 255, 0.4); background: rgba(0, 255, 255, 0.1); }
 
         button {
             width: 100%;
-            padding: 15px;
-            background: rgba(0, 255, 255, 0.05);
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            color: #0ff;
-            font-family: 'Rajdhani', sans-serif;
+            padding: 14px;
+            font-family: 'Orbitron', sans-serif;
             font-size: 16px;
             font-weight: 700;
             cursor: pointer;
+            background: rgba(0, 255, 255, 0.1);
+            color: #0ff;
+            border: 1px solid #0ff;
+            border-radius: 8px;
+            transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 1px;
-            transition: 0.3s;
-            backdrop-filter: blur(5px);
+            margin-bottom: 15px;
+        }
+        button:active, button:hover {
+            background: rgba(0, 255, 255, 0.25);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
         }
 
-        button:active { background: rgba(0, 255, 255, 0.2); box-shadow: 0 0 20px rgba(0, 255, 255, 0.6); }
+        .btn-danger { border-color: #ff0055; color: #ff0055; background: rgba(255, 0, 85, 0.05); }
+        .btn-danger:active, .btn-danger:hover { background: rgba(255, 0, 85, 0.2); box-shadow: 0 0 20px rgba(255, 0, 85, 0.6); }
 
-        .btn-danger { color: #ff3366; border-color: rgba(255, 51, 102, 0.3); }
-        .btn-danger-box::before, .btn-danger-box::after { border-color: #ff3366; box-shadow: 0 0 8px rgba(255, 51, 102, 0.5); }
-        .btn-danger:active { background: rgba(255, 51, 102, 0.2); box-shadow: 0 0 20px rgba(255, 51, 102, 0.6); }
-
-        #status { font-size: 14px; font-weight: 600; letter-spacing: 1px; margin-bottom: 25px; height: 20px;}
+        #status { font-size: 15px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; height: 20px; }
         
-        .controls { display: none; margin-top: 30px; }
+        .controls { display: none; margin-top: 15px; }
         
-        /* Sürekli Akan Dalga Gösterici */
+        /* Şeffaf Dalga Ekranı */
         canvas {
             width: 100%;
             height: 80px;
-            margin: 20px 0;
+            background: transparent;
+            margin-bottom: 15px;
             display: none;
         }
 
-        .status-text {
-            font-size: 16px;
-            margin-bottom: 15px;
-            letter-spacing: 1px;
-        }
-
-        .info-text {
-            font-size: 12px;
-            color: #4a6b8c;
+        .info-box {
+            background: rgba(0, 255, 255, 0.03);
+            border-left: 3px solid #0ff;
+            padding: 12px;
+            font-size: 13px;
+            text-align: left;
+            color: #8a9fc4;
             margin-top: 20px;
-            letter-spacing: 0.5px;
+            line-height: 1.5;
+            border-radius: 0 8px 8px 0;
         }
-        .info-text span { color: #0ff; }
+        .info-box span { color: #0ff; font-weight: bold; }
+
     </style>
 </head>
 <body>
@@ -125,25 +119,21 @@
         <h1>NXY SESLİ</h1>
         
         <div id="setupScreen">
-            <div class="cyber-box">
-                <button onclick="joinRoom()">ODAYA BAĞLAN</button>
-            </div>
-            <div class="cyber-box" style="margin-top: 15px;">
-                <input type="text" id="roomName" placeholder="ODA ADINI YAZIN" autocomplete="off">
-            </div>
+            <input type="text" id="roomName" placeholder="ODA ADINI YAZIN" autocomplete="off">
+            <button onclick="joinRoom()">ODAYA BAĞLAN</button>
         </div>
 
-        <canvas id="visualizer"></canvas>
         <p id="status"></p>
+        <canvas id="visualizer"></canvas>
 
         <div id="controlsScreen" class="controls">
-            <p class="status-text">MİKROFON: <span id="micStatus" style="color: #0ff; text-shadow: 0 0 8px #0ff;">AKTİF</span></p>
+            <p style="margin-bottom: 15px; font-size: 16px;">MİKROFON: <span id="micStatus" style="color: #0ff; text-shadow: 0 0 8px #0ff;">AKTİF</span></p>
+            <button id="muteBtn" onclick="toggleMute()" class="btn-danger">MİKROFONU KAPAT (M)</button>
             
-            <div class="cyber-box btn-danger-box">
-                <button id="muteBtn" onclick="toggleMute()" class="btn-danger">MİKROFONU KAPAT (M)</button>
+            <div class="info-box">
+                <p>🎙️ <b>Gürültü Filtresi:</b> Aktif (Agresif Noise Gate)</p>
+                <p style="margin-top: 5px;">⌨️ <b>Kısayollar:</b> <span>[M]</span> Sustur</p>
             </div>
-            
-            <p class="info-text">Gürültü Filtresi: <span style="color: #0ff;">Aktif (Dinamik Highpass)</span></p>
         </div>
 
         <audio id="remoteAudio" autoplay></audio>
@@ -154,27 +144,33 @@
         let localStream;
         let isMuted = false;
         let audioCtx;
+        let biquadFilter;
         let gainNode;
 
         const statusEl = document.getElementById('status');
         const visualizer = document.getElementById('visualizer');
         const canvasCtx = visualizer.getContext('2d');
 
-        // Net ses için sadece varsayılan gürültü engellemeyi kullanıyoruz, AutoGainControl kapalı
+        // Eski Başarılı Ayarlara Dönüş
         const audioConstraints = {
-            audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: false, sampleRate: 48000 },
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: false, 
+                channelCount: 1 
+            },
             video: false
         };
 
         function joinRoom() {
             const roomInput = document.getElementById('roomName').value.trim().toLowerCase();
-            if(!roomInput) return alert("Oda adı girin!");
+            if(!roomInput) return alert("Lütfen bir oda adı girin!");
 
             document.getElementById('setupScreen').style.display = 'none';
-            statusEl.innerText = "BAĞLANTI KURULUYOR...";
+            statusEl.innerText = "SİSTEME BAĞLANILIYOR...";
             statusEl.style.color = "#0ff";
 
-            const hostId = "nxy-v3-" + roomInput; 
+            const hostId = "nxy-mobil-v4-" + roomInput; 
             
             peer = new Peer({ config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' } ] } });
 
@@ -189,6 +185,7 @@
                         peer.on('open', () => {
                             setupMedia();
                             statusEl.innerText = "BAĞLANTI BEKLENİYOR...";
+                            statusEl.style.color = "#0ff";
                         });
                         peer.on('call', (call) => {
                             call.answer(localStream);
@@ -208,16 +205,17 @@
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                     const source = audioCtx.createMediaStreamSource(stream);
                     
-                    // Sesi boğmamak için sadece çok düşük uğultuları kesen Highpass filtresi (80Hz altı)
-                    const highpassFilter = audioCtx.createBiquadFilter();
-                    highpassFilter.type = "highpass";
-                    highpassFilter.frequency.value = 80;
+                    // Eski Agresif Filtre
+                    biquadFilter = audioCtx.createBiquadFilter();
+                    biquadFilter.type = "bandpass"; 
+                    biquadFilter.frequency.value = 1850; 
+                    biquadFilter.Q.value = 0.55; 
 
                     gainNode = audioCtx.createGain();
                     gainNode.gain.value = 1.0; 
 
-                    source.connect(highpassFilter);
-                    highpassFilter.connect(gainNode);
+                    source.connect(biquadFilter);
+                    biquadFilter.connect(gainNode);
 
                     const destination = audioCtx.createMediaStreamDestination();
                     gainNode.connect(destination);
@@ -226,11 +224,11 @@
                     document.getElementById('controlsScreen').style.display = 'block';
                     visualizer.style.display = 'block';
                     
-                    startVisualizer(highpassFilter); 
+                    startVisualizer(biquadFilter); 
                     
                     if(callback) callback();
                 })
-                .catch((err) => { alert("Mikrofon izni gerekli!"); });
+                .catch((err) => { alert("Mikrofon izni şart!"); });
         }
 
         function startCall(remoteId) {
@@ -243,7 +241,7 @@
             });
         }
 
-        // İstediğin akıcı ince çizgi (Sine Wave) görselleştiricisi
+        // Daha Canlı ve Şiddetli Dalga (Sine Wave)
         function startVisualizer(audioNode) {
             const analyser = audioCtx.createAnalyser();
             analyser.fftSize = 512;
@@ -253,13 +251,13 @@
 
             function draw() {
                 requestAnimationFrame(draw);
-                analyser.getByteTimeDomainData(dataArray); // Bloklar yerine dalga formu verisi çekilir
+                analyser.getByteTimeDomainData(dataArray);
                 
                 canvasCtx.clearRect(0, 0, visualizer.width, visualizer.height);
                 
-                canvasCtx.lineWidth = 2;
+                canvasCtx.lineWidth = 3; // Daha kalın çizgi
                 canvasCtx.strokeStyle = '#0ff';
-                canvasCtx.shadowBlur = 10;
+                canvasCtx.shadowBlur = 15; // Güçlü neon parlama
                 canvasCtx.shadowColor = '#0ff';
                 canvasCtx.beginPath();
 
@@ -268,8 +266,9 @@
                 let maxVolume = 0;
 
                 for(let i = 0; i < bufferLength; i++) {
-                    let v = dataArray[i] / 128.0;
-                    let y = v * (visualizer.height / 2);
+                    // Dalga şiddetini 3.5 kat artırdık (Daha canlı hareket)
+                    let v = ((dataArray[i] - 128) * 3.5) + 128; 
+                    let y = (v / 128.0) * (visualizer.height / 2);
 
                     if(i === 0) canvasCtx.moveTo(x, y);
                     else canvasCtx.lineTo(x, y);
@@ -283,11 +282,11 @@
                 canvasCtx.lineTo(visualizer.width, visualizer.height / 2);
                 canvasCtx.stroke();
 
-                // Gürültü Kapısı (Noise Gate) - Eşik çok düşük tutuldu ki sesi kesmesin
-                if (maxVolume < 3) {
-                    gainNode.gain.value = 0.0;
+                // Eski Agresif Gürültü Kapısı (Eşik: 45)
+                if (maxVolume < 45) {
+                    gainNode.gain.value = 0.0; 
                 } else {
-                    gainNode.gain.value = 1.0;
+                    gainNode.gain.value = 1.0; 
                 }
             }
             draw();
@@ -300,26 +299,21 @@
             
             const statusTxt = document.getElementById('micStatus');
             const btn = document.getElementById('muteBtn');
-            const btnBox = btn.parentElement;
             
             if(isMuted) {
                 statusTxt.innerText = "KAPALI";
-                statusTxt.style.color = "#ff3366";
-                statusTxt.style.textShadow = "0 0 8px #ff3366";
+                statusTxt.style.color = "#ff0055";
                 btn.innerText = "MİKROFONU AÇ (M)";
-                btn.className = "";
+                btn.style.borderColor = "#0ff";
                 btn.style.color = "#0ff";
-                btn.style.borderColor = "rgba(0, 255, 255, 0.3)";
-                btnBox.className = "cyber-box";
+                btn.style.background = "rgba(0, 255, 255, 0.05)";
             } else {
                 statusTxt.innerText = "AKTİF";
                 statusTxt.style.color = "#0ff";
-                statusTxt.style.textShadow = "0 0 8px #0ff";
                 btn.innerText = "MİKROFONU KAPAT (M)";
-                btn.className = "btn-danger";
-                btn.style.color = "";
-                btn.style.borderColor = "";
-                btnBox.className = "cyber-box btn-danger-box";
+                btn.style.borderColor = "#ff0055";
+                btn.style.color = "#ff0055";
+                btn.style.background = "rgba(255, 0, 85, 0.05)";
             }
         }
 

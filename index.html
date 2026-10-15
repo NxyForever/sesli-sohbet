@@ -94,7 +94,8 @@
         .btn-danger { border-color: #ff0055; color: #ff0055; }
         .btn-danger:active, .btn-danger:hover { background: rgba(255, 0, 85, 0.1); box-shadow: 0 0 15px rgba(255, 0, 85, 0.4); }
 
-        .btn-ptt { border-color: #ffaa00; color: #ffaa00; margin-top: 5px;}
+        /* Bas Konuş Butonu Varsayılan Olarak Gizli (Sadece Mobilde Görünecek) */
+        .btn-ptt { border-color: #ffaa00; color: #ffaa00; margin-top: 5px; display: none; }
         .btn-ptt.active-ptt { background: rgba(255, 170, 0, 0.2); box-shadow: 0 0 15px rgba(255, 170, 0, 0.6); color: #fff;}
 
         #status { font-size: 15px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; }
@@ -123,11 +124,16 @@
         }
         .info-box span { color: #0ff; font-weight: bold; }
 
-        /* Yeni: Kullanıcı Listesi ve Ses Slider Tasarımları */
+        /* Kullanıcı Listesi ve Ses Slider Tasarımları */
         #usersPanel { margin-top: 15px; background: rgba(0, 255, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(0, 255, 255, 0.15); text-align: left;}
         .user-item { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 6px; border: 1px solid #005577; }
         .user-item input[type=range] { width: 80px; height: 4px; appearance: none; background: rgba(0,255,255,0.2); border-radius: 2px; outline: none; margin: 0; }
         .user-item input[type=range]::-webkit-slider-thumb { appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #0ff; cursor: pointer; box-shadow: 0 0 5px #0ff; }
+
+        /* Mobil Cihazlar İçin Görünürlük Ayarı */
+        @media (max-width: 768px) {
+            .btn-ptt { display: block; } /* Bas Konuş sadece telefonda aktif */
+        }
 
         @media (max-height: 600px) {
             body { padding: 5px; }
@@ -158,7 +164,7 @@
             <button id="muteBtn" onclick="toggleMute()" class="btn-danger">Mikrofonu Kapat (M)</button>
             <button id="pttBtn" class="btn-ptt">BAS KONUŞ (BASILI TUT)</button>
             
-            <!-- Yeni: Odadakiler Paneli -->
+            <!-- Odadakiler Paneli -->
             <div id="usersPanel">
                 <p style="font-size: 14px; font-weight: bold; color: #0ff; margin-bottom: 5px;">👥 ODADAKİLER (<span id="userCount">1</span>)</p>
                 <div id="usersList"></div>
@@ -180,9 +186,9 @@
         let audioCtx;
         let biquadFilter;
         let gainNode;
-        let muteGainNode; // Yeni: Gecikmeyi çözen yazılımsal susturucu
+        let muteGainNode; // Gecikmeyi çözen yazılımsal susturucu
         let myUsername = "";
-        let remoteUsers = {}; // Bağlı kişileri ve ses ayarlarını tutar
+        let remoteUsers = {}; 
 
         const statusEl = document.getElementById('status');
         const visualizer = document.getElementById('visualizer');
@@ -224,66 +230,64 @@
             statusEl.innerText = "SİSTEME BAĞLANILIYOR...";
             statusEl.style.color = "#0ff";
 
-            const hostId = "nxy-mobil-v7-" + roomInput; 
+            const hostId = "nxy-mobil-v8-" + roomInput; 
             
-            peer = new Peer({ config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' } ] } });
+            // HATA ÇÖZÜMÜ: Önce mikrofon erişimini alıyoruz ki sistem askıda kalmasın
+            setupMedia(() => {
+                peer = new Peer({ config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' } ] } });
 
-            peer.on('open', (id) => {
-                // Veri kanalı üzerinden isim gönderme (Müşteri -> Oda Sahibi)
-                const conn = peer.connect(hostId);
-                conn.on('open', () => { conn.send({type: 'name', name: myUsername}); });
-                conn.on('data', (data) => { if(data.type === 'name') updateUserName(conn.peer, data.name); });
-
-                conn.on('error', () => {}); // Hataları yoksay
-
-                const call = peer.call(hostId, localStream, { metadata: { username: myUsername } });
-                
-                if (call) {
-                    handleCall(call, hostId, "Oda Sahibi");
-                } else {
-                    // Odaya ilk giren bizsek (Oda Sahibiyiz)
-                    peer.destroy();
-                    peer = new Peer(hostId, { config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' } ] } });
+                peer.on('open', (id) => {
+                    const conn = peer.connect(hostId);
                     
-                    peer.on('open', () => {
-                        setupMedia(() => {
-                            statusEl.innerText = "BAĞLANTI BEKLENİYOR...";
+                    conn.on('open', () => { 
+                        conn.send({type: 'name', name: myUsername}); 
+                        const call = peer.call(hostId, localStream, { metadata: { username: myUsername } });
+                        if(call) handleCall(call, hostId, "Oda Sahibi");
+                    });
+
+                    conn.on('data', (data) => { 
+                        if(data.type === 'name') updateUserName(conn.peer, data.name); 
+                    });
+                });
+
+                peer.on('error', (err) => {
+                    if(err.type === 'peer-unavailable') {
+                        peer.destroy();
+                        peer = new Peer(hostId, { config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' } ] } });
+                        
+                        peer.on('open', () => {
+                            statusEl.innerText = "ODA KURULDU, BEKLENİYOR...";
                             statusEl.style.color = "#0ff";
                             renderUserList();
                         });
-                    });
 
-                    // Veri kanalı (Oda Sahibi -> Müşteri İsim Gönderimi)
-                    peer.on('connection', (inConn) => {
-                        inConn.on('data', (data) => { if(data.type === 'name') updateUserName(inConn.peer, data.name); });
-                        inConn.on('open', () => { inConn.send({type: 'name', name: myUsername}); });
-                    });
+                        peer.on('connection', (inConn) => {
+                            inConn.on('data', (data) => { if(data.type === 'name') updateUserName(inConn.peer, data.name); });
+                            inConn.on('open', () => { inConn.send({type: 'name', name: myUsername}); });
+                        });
 
-                    // Gelen Aramaları Yanıtlama
-                    peer.on('call', (incomingCall) => {
-                        incomingCall.answer(localStream);
-                        let callerName = incomingCall.metadata ? incomingCall.metadata.username : "Bağlanıyor...";
-                        handleCall(incomingCall, incomingCall.peer, callerName);
-                    });
-                }
+                        peer.on('call', (incomingCall) => {
+                            incomingCall.answer(localStream);
+                            let callerName = incomingCall.metadata ? incomingCall.metadata.username : "Bağlanıyor...";
+                            handleCall(incomingCall, incomingCall.peer, callerName);
+                        });
+                    }
+                });
             });
         }
 
-        // Aramaları Yönetme ve Kişiye Özel Ses Yükseltici Oluşturma
         function handleCall(call, peerId, defaultName) {
             setupMedia(() => {
                 call.on('stream', (remoteStream) => {
                     if(remoteUsers[peerId] && remoteUsers[peerId].stream === remoteStream) return;
 
-                    // Gelen sesi alıp %300'e kadar yükseltilebilecek bir GainNode'a bağlıyoruz
                     const remoteSource = audioCtx.createMediaStreamSource(remoteStream);
                     const remoteGain = audioCtx.createGain();
-                    remoteGain.gain.value = 1.0; // Standart %100 ses seviyesi
+                    remoteGain.gain.value = 1.0; 
                     
                     remoteSource.connect(remoteGain);
-                    remoteGain.connect(audioCtx.destination); // Sesi hoparlöre aktar
+                    remoteGain.connect(audioCtx.destination); 
 
-                    // Tarayıcı bug'ı için gizli ve sessiz bir HTML Audio elementi
                     const dummyAudio = document.createElement('audio');
                     dummyAudio.autoplay = true; dummyAudio.muted = true;
                     dummyAudio.srcObject = remoteStream;
@@ -313,12 +317,11 @@
             }
         }
 
-        // Odadakileri ve Ses Slider'larını Ekrana Çizme
         function renderUserList() {
             const list = document.getElementById('usersList');
             const count = document.getElementById('userCount');
             list.innerHTML = "";
-            let total = 1; // Biz dahil
+            let total = 1; 
             
             for(let id in remoteUsers) {
                 total++;
@@ -326,7 +329,6 @@
                 const div = document.createElement('div');
                 div.className = "user-item";
                 
-                // min=0 (Sessiz), max=3 (%300 Ses)
                 div.innerHTML = `
                     <span style="color: #fff; font-size: 14px; font-weight: bold;">👤 ${u.name}</span>
                     <input type="range" min="0" max="3" step="0.1" value="${u.gainNode.gain.value}" title="Ses Seviyesi (0% - 300%)">
@@ -341,11 +343,10 @@
         }
 
         function setupMedia(callback) {
-            if(localStream) { if(callback) callback(); return; } // Zaten kuruluysa tekrar kurma
+            if(localStream) { if(callback) callback(); return; } 
 
             navigator.mediaDevices.getUserMedia(audioConstraints)
                 .then((stream) => {
-                    // latencyHint: 'interactive' kulaklık gecikmesini (buffer) minimize eder
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
                     const source = audioCtx.createMediaStreamSource(stream);
                     
@@ -357,7 +358,6 @@
                     gainNode = audioCtx.createGain();
                     gainNode.gain.value = 1.0; 
 
-                    // YENİ: 1 Saniyelik Kulaklık Gecikmesini ve Ses Tonu Değişimini Çözen Düğüm
                     muteGainNode = audioCtx.createGain();
                     muteGainNode.gain.value = 1.0;
 
@@ -408,7 +408,6 @@
                 }
 
                 for(let i = 0; i < bufferLength; i++) {
-                    // Mute yapıldığında ekrandaki dalgayı da düz çizgiye çeker
                     let v = (muteGainNode.gain.value === 0 || gainNode.gain.value === 0) ? 0 : dataArray[i] / 3.5;
                     barHeight = v;
                     canvasCtx.fillStyle = `rgb(0, ${barHeight + 100}, 255)`;
@@ -423,8 +422,6 @@
             if(!localStream) return;
             isMuted = !isMuted;
             
-            // YENİ: Akış (Stream) asla kapanmaz, sesi yazılımla %0'a indiririz.
-            // Bu sayede Bluetooth kulaklıklar uyku moduna geçmez ve gecikme yaşanmaz!
             muteGainNode.gain.value = isMuted ? 0.0 : 1.0;
             
             const statusTxt = document.getElementById('micStatus');
@@ -447,7 +444,7 @@
             if(e) e.preventDefault();
             if(isMuted && !isPttActive && localStream) {
                 isPttActive = true;
-                muteGainNode.gain.value = 1.0; // Basınca sesi aç (Gecikmesiz)
+                muteGainNode.gain.value = 1.0; 
                 playSound('on');
                 document.getElementById('micStatus').innerText = "KONUŞUYOR (V)";
                 document.getElementById('micStatus').style.color = "#ffaa00";
@@ -459,7 +456,7 @@
             if(e) e.preventDefault();
             if(isMuted && isPttActive && localStream) {
                 isPttActive = false;
-                muteGainNode.gain.value = 0.0; // Bırakınca sesi kapat
+                muteGainNode.gain.value = 0.0; 
                 playSound('off');
                 document.getElementById('micStatus').innerText = "KAPALI";
                 document.getElementById('micStatus').style.color = "#ff0055";

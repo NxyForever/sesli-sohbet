@@ -94,6 +94,7 @@
         .btn-danger { border-color: #ff0055; color: #ff0055; }
         .btn-danger:active, .btn-danger:hover { background: rgba(255, 0, 85, 0.1); box-shadow: 0 0 15px rgba(255, 0, 85, 0.4); }
 
+        /* Bas Konuş Butonu Sadece Mobilde (Genişlik 768px altı) Görünür */
         .btn-ptt { border-color: #ffaa00; color: #ffaa00; margin-top: 5px; display: none; }
         .btn-ptt.active-ptt { background: rgba(255, 170, 0, 0.2); box-shadow: 0 0 15px rgba(255, 170, 0, 0.6); color: #fff;}
 
@@ -123,7 +124,7 @@
         }
         .info-box span { color: #0ff; font-weight: bold; }
 
-        /* Gelişmiş Kullanıcı Listesi ve Ses Slider Tasarımları */
+        /* Kullanıcı Listesi ve Ses Slider Tasarımları */
         #usersPanel { margin-top: 15px; background: rgba(0, 255, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(0, 255, 255, 0.15); text-align: left;}
         .user-item { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; background: rgba(0,0,0,0.3); padding: 10px 12px; border-radius: 8px; border: 1px solid #005577; }
         .user-info { display: flex; flex-direction: column; text-align: left; }
@@ -166,7 +167,7 @@
             <button id="muteBtn" onclick="toggleMute()" class="btn-danger">Mikrofonu Kapat (M)</button>
             <button id="pttBtn" class="btn-ptt">BAS KONUŞ (BASILI TUT)</button>
             
-            <!-- Geliştirilmiş Odadakiler Paneli -->
+            <!-- Odadakiler Paneli (Sadece Karşıdakiler) -->
             <div id="usersPanel">
                 <p style="font-size: 14px; font-weight: bold; color: #0ff; margin-bottom: 5px;">👥 ODADAKİLER (<span id="userCount">1</span>)</p>
                 <div id="usersList"></div>
@@ -188,12 +189,11 @@
         let audioCtx;
         
         let biquadFilter;
-        let gainNode; // Noise gate için
-        let micVolumeNode; // Kendi mikrofonumuzun şiddeti için (Karşıya giden ses)
-        let muteGainNode; // PTT ve Mute için sıfır gecikmeli susturucu
+        let gainNode; 
+        let muteGainNode; // Gecikmesiz Mute/PTT için
         
         let myUsername = "";
-        let peerNames = {}; // İsim senkronizasyon hafızası
+        let peerNames = {}; 
         let remoteUsers = {}; 
 
         const statusEl = document.getElementById('status');
@@ -225,7 +225,6 @@
             video: false
         };
 
-        // İsimleri Ağ Üzerinde Eşitleyen Fonksiyon
         function updateUserName(peerId, name) {
             peerNames[peerId] = name;
             if(remoteUsers[peerId]) {
@@ -245,13 +244,12 @@
             statusEl.innerText = "SİSTEME BAĞLANILIYOR...";
             statusEl.style.color = "#0ff";
 
-            const hostId = "nxy-mobil-v9-" + roomInput; 
+            const hostId = "nxy-mobil-v10-" + roomInput; 
             
             setupMedia(() => {
                 peer = new Peer({ config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' } ] } });
 
                 peer.on('open', (id) => {
-                    // Müşteri -> Oda Sahibine Bağlanırken İsim Gönderimi
                     const conn = peer.connect(hostId, { metadata: { username: myUsername } });
                     
                     conn.on('open', () => { 
@@ -267,7 +265,6 @@
 
                 peer.on('error', (err) => {
                     if(err.type === 'peer-unavailable') {
-                        // Odayı Kuran Kişi Bizsek
                         peer.destroy();
                         peer = new Peer(hostId, { config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' } ] } });
                         
@@ -329,33 +326,18 @@
             });
         }
 
-        // Dinamik UI: Kendi Sesimiz ve Karşı Tarafın Sesi
+        // SADECE KARŞIDAKİLERİ GÖSTEREN LİSTE
         function renderUserList() {
             const list = document.getElementById('usersList');
             const count = document.getElementById('userCount');
             list.innerHTML = "";
-            let total = 1; 
+            let total = 1; // Biz dahil toplam kişi sayısı
             
-            // 1. Her zaman en üstte KENDİ PROFİLİMİZ (Mikrofon Gücü)
-            const myDiv = document.createElement('div');
-            myDiv.className = "user-item";
-            myDiv.innerHTML = `
-                <div class="user-info">
-                    <span class="user-name" style="color: #0ff;">👤 ${myUsername || "Sen"} (Sen)</span>
-                    <span class="user-role">Mikrofon Şiddeti (Karşıya Giden)</span>
-                </div>
-                <input type="range" id="myVolSlider" min="0" max="3" step="0.1" value="${micVolumeNode ? micVolumeNode.gain.value : 1.0}" title="Sesini Karşıya İletme Seviyesi">
-            `;
-            list.appendChild(myDiv);
+            let hasRemoteUsers = false;
 
-            // Kendi ses kaydırıcımız değiştiğinde
-            myDiv.querySelector('#myVolSlider').oninput = (e) => {
-                if(micVolumeNode) micVolumeNode.gain.value = parseFloat(e.target.value);
-            };
-
-            // 2. Bağlanan Diğer Kullanıcılar (Duyma Seviyesi)
             for(let id in remoteUsers) {
                 total++;
+                hasRemoteUsers = true;
                 const u = remoteUsers[id];
                 const div = document.createElement('div');
                 div.className = "user-item";
@@ -365,7 +347,7 @@
                         <span class="user-name" style="color: #fff;">👤 ${u.name}</span>
                         <span class="user-role">Kişinin Sesi (Duyma Seviyesi)</span>
                     </div>
-                    <input type="range" min="0" max="3" step="0.1" value="${u.gainNode.gain.value}" title="Bu Kişinin Sesini Duyma Seviyesi">
+                    <input type="range" min="0" max="3" step="0.1" value="${u.gainNode.gain.value}" title="Sesi Ayarla">
                 `;
                 
                 div.querySelector('input').oninput = (e) => {
@@ -373,9 +355,15 @@
                 };
                 list.appendChild(div);
             }
+
+            if(!hasRemoteUsers) {
+                list.innerHTML = `<p style="font-size: 12px; color: #8a9fc4; text-align: center; margin-top: 10px;">Şu an odada sadece sen varsın.</p>`;
+            }
+
             count.innerText = total;
         }
 
+        // KUSURSUZ SES ZİNCİRİ (BOZULMAYAN HALİ)
         function setupMedia(callback) {
             if(localStream) { if(callback) callback(); return; } 
 
@@ -389,20 +377,16 @@
                     biquadFilter.frequency.value = 1850; 
                     biquadFilter.Q.value = 0.55; 
 
-                    gainNode = audioCtx.createGain(); // Noise Gate Düğümü
+                    gainNode = audioCtx.createGain(); 
                     gainNode.gain.value = 1.0; 
 
-                    micVolumeNode = audioCtx.createGain(); // Kendi Sesimizi Yükseltme/Kısma Düğümü
-                    micVolumeNode.gain.value = 1.0;
-
-                    muteGainNode = audioCtx.createGain(); // Mute ve PTT için sıfır gecikmeli düğüm
+                    muteGainNode = audioCtx.createGain(); 
                     muteGainNode.gain.value = 1.0;
 
-                    // Bağlantı Zinciri
+                    // Stabil ve Temiz Ses Zinciri
                     source.connect(biquadFilter);
                     biquadFilter.connect(gainNode);
-                    gainNode.connect(micVolumeNode);
-                    micVolumeNode.connect(muteGainNode);
+                    gainNode.connect(muteGainNode);
 
                     const destination = audioCtx.createMediaStreamDestination();
                     muteGainNode.connect(destination);

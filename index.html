@@ -23,7 +23,6 @@
             padding: 15px;
         }
 
-        /* Şeffaf Neon Kare Tasarım (Buzlu Cam Efekti) */
         .hud-container {
             background: rgba(10, 15, 30, 0.4);
             border: 1px solid rgba(0, 255, 255, 0.3);
@@ -89,7 +88,6 @@
         
         .controls { display: none; margin-top: 15px; }
         
-        /* Şeffaf Dalga Ekranı */
         canvas {
             width: 100%;
             height: 80px;
@@ -131,7 +129,7 @@
             <button id="muteBtn" onclick="toggleMute()" class="btn-danger">MİKROFONU KAPAT (M)</button>
             
             <div class="info-box">
-                <p>🎙️ <b>Gürültü Filtresi:</b> Aktif (Agresif Noise Gate)</p>
+                <p>🎙️ <b>Gürültü Filtresi:</b> Aktif (300-3400Hz Çiftli Filtre)</p>
                 <p style="margin-top: 5px;">⌨️ <b>Kısayollar:</b> <span>[M]</span> Sustur</p>
             </div>
         </div>
@@ -144,14 +142,14 @@
         let localStream;
         let isMuted = false;
         let audioCtx;
-        let biquadFilter;
         let gainNode;
+        let highpassFilter;
+        let lowpassFilter;
 
         const statusEl = document.getElementById('status');
         const visualizer = document.getElementById('visualizer');
         const canvasCtx = visualizer.getContext('2d');
 
-        // Eski Başarılı Ayarlara Dönüş
         const audioConstraints = {
             audio: {
                 echoCancellation: true,
@@ -170,7 +168,7 @@
             statusEl.innerText = "SİSTEME BAĞLANILIYOR...";
             statusEl.style.color = "#0ff";
 
-            const hostId = "nxy-mobil-v4-" + roomInput; 
+            const hostId = "nxy-mobil-v5-" + roomInput; 
             
             peer = new Peer({ config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' } ] } });
 
@@ -205,17 +203,23 @@
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                     const source = audioCtx.createMediaStreamSource(stream);
                     
-                    // Eski Agresif Filtre
-                    biquadFilter = audioCtx.createBiquadFilter();
-                    biquadFilter.type = "bandpass"; 
-                    biquadFilter.frequency.value = 1850; 
-                    biquadFilter.Q.value = 0.55; 
+                    // 1. Aşama: 300Hz Altını Kes (Kalın Uğultu ve Dip Sesler)
+                    highpassFilter = audioCtx.createBiquadFilter();
+                    highpassFilter.type = "highpass";
+                    highpassFilter.frequency.value = 300;
+
+                    // 2. Aşama: 3400Hz Üstünü Kes (İnce Tizler ve Tıkırtılar)
+                    lowpassFilter = audioCtx.createBiquadFilter();
+                    lowpassFilter.type = "lowpass";
+                    lowpassFilter.frequency.value = 3400;
 
                     gainNode = audioCtx.createGain();
                     gainNode.gain.value = 1.0; 
 
-                    source.connect(biquadFilter);
-                    biquadFilter.connect(gainNode);
+                    // Filtreleri birbirine bağlıyoruz
+                    source.connect(highpassFilter);
+                    highpassFilter.connect(lowpassFilter);
+                    lowpassFilter.connect(gainNode);
 
                     const destination = audioCtx.createMediaStreamDestination();
                     gainNode.connect(destination);
@@ -224,7 +228,7 @@
                     document.getElementById('controlsScreen').style.display = 'block';
                     visualizer.style.display = 'block';
                     
-                    startVisualizer(biquadFilter); 
+                    startVisualizer(lowpassFilter); 
                     
                     if(callback) callback();
                 })
@@ -241,13 +245,17 @@
             });
         }
 
-        // Daha Canlı ve Şiddetli Dalga (Sine Wave)
+        // Akıcı, Yavaş ve Daha Şık Dalga Göstericisi (Smoothed Sine Wave)
         function startVisualizer(audioNode) {
             const analyser = audioCtx.createAnalyser();
             analyser.fftSize = 512;
             audioNode.connect(analyser);
             const bufferLength = analyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
+            
+            // Dalganın yavaş hareket etmesi için hafıza dizisi
+            const smoothData = new Float32Array(bufferLength);
+            for(let i=0; i<bufferLength; i++) smoothData[i] = 128;
 
             function draw() {
                 requestAnimationFrame(draw);
@@ -255,9 +263,9 @@
                 
                 canvasCtx.clearRect(0, 0, visualizer.width, visualizer.height);
                 
-                canvasCtx.lineWidth = 3; // Daha kalın çizgi
+                canvasCtx.lineWidth = 3;
                 canvasCtx.strokeStyle = '#0ff';
-                canvasCtx.shadowBlur = 15; // Güçlü neon parlama
+                canvasCtx.shadowBlur = 12;
                 canvasCtx.shadowColor = '#0ff';
                 canvasCtx.beginPath();
 
@@ -266,9 +274,16 @@
                 let maxVolume = 0;
 
                 for(let i = 0; i < bufferLength; i++) {
-                    // Dalga şiddetini 3.5 kat artırdık (Daha canlı hareket)
-                    let v = ((dataArray[i] - 128) * 3.5) + 128; 
+                    // Interpolation (Yumuşatma): Yeni veriye aniden atlamak yerine yavaşça süzülerek geçer (0.15 hızı)
+                    smoothData[i] += (dataArray[i] - smoothData[i]) * 0.15;
+
+                    // Şiddeti artır (Canlılık için)
+                    let v = ((smoothData[i] - 128) * 3.5) + 128; 
                     let y = (v / 128.0) * (visualizer.height / 2);
+
+                    // Sınırları taşmasını engelle
+                    if(y < 5) y = 5;
+                    if(y > visualizer.height - 5) y = visualizer.height - 5;
 
                     if(i === 0) canvasCtx.moveTo(x, y);
                     else canvasCtx.lineTo(x, y);
@@ -282,8 +297,8 @@
                 canvasCtx.lineTo(visualizer.width, visualizer.height / 2);
                 canvasCtx.stroke();
 
-                // Eski Agresif Gürültü Kapısı (Eşik: 45)
-                if (maxVolume < 45) {
+                // Düzeltilmiş Hassas Gürültü Kapısı (Eşik: 6) - Sesi asla yutmaz
+                if (maxVolume < 6) {
                     gainNode.gain.value = 0.0; 
                 } else {
                     gainNode.gain.value = 1.0; 

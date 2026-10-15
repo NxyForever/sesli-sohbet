@@ -3,44 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nxy Sesli Sohbet</title>
+    <title>Nxy Sesli Sohbet | Dijital Merkez</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; text-align: center; margin-top: 50px; background-color: #36393f; color: #dcddde; }
-        .container { background: #2f3136; padding: 30px; border-radius: 8px; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.3); width: 350px; }
-        h1 { color: #fff; font-size: 24px; margin-bottom: 20px; }
-        input { width: 80%; padding: 10px; border-radius: 5px; border: 1px solid #202225; background: #40444b; color: white; margin-bottom: 15px; outline: none; }
-        button { padding: 10px 20px; font-size: 14px; font-weight: bold; cursor: pointer; background: #5865F2; color: white; border: none; border-radius: 5px; transition: 0.2s; width: 85%; margin-bottom: 10px; }
-        button:hover { background: #4752C4; }
-        .btn-danger { background: #ed4245; }
-        .btn-danger:hover { background: #c03537; }
-        #status { margin-top: 15px; font-weight: bold; color: #43b581; font-size: 15px; }
-        .controls { display: none; margin-top: 20px; text-align: left; background: #202225; padding: 15px; border-radius: 5px; font-size: 13px; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Rajdhani', sans-serif; 
+            background: #0b0f19; 
+            color: #0ff; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh;
+            overflow: hidden;
+            background-image: radial-gradient(circle at center, #1a233a 0%, #0b0f19 100%);
+        }
+
+        .hud-container {
+            background: rgba(16, 22, 38, 0.8);
+            border: 2px solid #0ff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3), inset 0 0 20px rgba(0, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 40px;
+            width: 450px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #0ff;
+            letter-spacing: 2px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid #0ff;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            border-radius: 5px;
+            outline: none;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+
+        input:focus { box-shadow: 0 0 15px rgba(0, 255, 255, 0.5); }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            background: transparent;
+            color: #0ff;
+            border: 2px solid #0ff;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        button:hover {
+            background: #0ff;
+            color: #000;
+            box-shadow: 0 0 20px #0ff;
+        }
+
+        .btn-danger { border-color: #ff0055; color: #ff0055; }
+        .btn-danger:hover { background: #ff0055; color: #fff; box-shadow: 0 0 20px #ff0055; }
+
+        #status { font-size: 18px; margin-bottom: 20px; text-shadow: 0 0 5px currentColor; }
+        
+        .controls { display: none; margin-top: 20px; }
+        
+        /* Dijital Ses Dalgaları (Visualizer) */
+        canvas {
+            width: 100%;
+            height: 60px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid #0ff;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .info-box {
+            background: rgba(0, 255, 255, 0.05);
+            border-left: 3px solid #0ff;
+            padding: 10px;
+            font-size: 14px;
+            text-align: left;
+            color: #aaa;
+            margin-top: 15px;
+        }
+        .info-box span { color: #0ff; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>🎙️ Nxy Sesli Sohbet</h1>
+    <div class="hud-container">
+        <h1>NXY SİSTEMİ</h1>
         
         <div id="setupScreen">
-            <p>Oda adını yazıp katıl veya oluştur:</p>
-            <input type="text" id="roomName" placeholder="Örn: oyun-odasi" autocomplete="off">
-            <br>
-            <button onclick="joinRoom()">Odaya Gir</button>
+            <p style="margin-bottom: 15px; color: #aaa;">Bağlantı Portu (Oda Adı):</p>
+            <input type="text" id="roomName" placeholder="Örn: nxy-alfa" autocomplete="off">
+            <button onclick="joinRoom()">Sisteme Bağlan</button>
         </div>
 
         <p id="status"></p>
+        <canvas id="visualizer"></canvas>
 
         <div id="controlsScreen" class="controls">
-            <p>🟢 <b>Durum:</b> <span id="micStatus" style="color: #43b581;">Mikrofon Açık</span></p>
+            <p style="margin-bottom: 10px; font-size: 18px;">Modül Durumu: <span id="micStatus" style="color: #0ff; text-shadow: 0 0 8px #0ff;">AKTİF</span></p>
             <button id="muteBtn" onclick="toggleMute()" class="btn-danger">Mikrofonu Kapat (M)</button>
-            <hr style="border-color: #40444b; margin: 15px 0;">
-            <p>⌨️ <b>Kısayollar (Tarayıcı Açıkken):</b></p>
-            <ul style="padding-left: 20px; margin-top: 5px;">
-                <li><b>M:</b> Mikrofonu Aç/Kapat</li>
-                <li><b>V:</b> Bas Konuş (Basılı Tut)</li>
-            </ul>
+            
+            <div class="info-box">
+                <p>⌨️ <b>Klavye Kısayolları:</b></p>
+                <p><span>[M]</span> Modülü Sustur/Aç</p>
+                <p><span>[V]</span> Telsiz Modu (Bas-Konuş)</p>
+            </div>
         </div>
 
         <audio id="remoteAudio" autoplay></audio>
@@ -51,21 +144,181 @@
         let localStream;
         let isMuted = false;
         let isPttActive = false;
+        let audioContext;
 
-        // Bip sesleri (Harici dosya gerektirmemesi için Web Audio API ile üretildi)
+        const statusEl = document.getElementById('status');
+        const visualizer = document.getElementById('visualizer');
+        const canvasCtx = visualizer.getContext('2d');
+
         function playSound(type) {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = 'sine';
-            gain.connect(ctx.destination);
-            osc.connect(gain);
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type === 'on' ? 'square' : 'sawtooth';
+                gain.connect(ctx.destination);
+                osc.connect(gain);
+                
+                if (type === 'on') {
+                    osc.frequency.setValueAtTime(880, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.05, ctx.currentTime);
+                    osc.start(); osc.stop(ctx.currentTime + 0.1);
+                } else {
+                    osc.frequency.setValueAtTime(440, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.05, ctx.currentTime);
+                    osc.start(); osc.stop(ctx.currentTime + 0.1);
+                }
+            } catch(e) {}
+        }
+
+        const audioConstraints = {
+            audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+            video: false
+        };
+
+        function joinRoom() {
+            const roomInput = document.getElementById('roomName').value.trim().toLowerCase();
+            if(!roomInput) return alert("Geçerli bir port (oda adı) girin!");
+
+            document.getElementById('setupScreen').style.display = 'none';
+            statusEl.innerText = "SİSTEME BAĞLANILIYOR...";
+            statusEl.style.color = "#ff00ff";
+
+            const hostId = "nxysys-" + roomInput; 
             
-            if (type === 'on') {
-                osc.frequency.setValueAtTime(600, ctx.currentTime);
-                gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                osc.start(); osc.stop(ctx.currentTime + 0.15);
+            // Google STUN sunucuları ile daha güçlü bağlantı
+            peer = new Peer({
+                config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' } ] }
+            });
+
+            peer.on('open', (id) => {
+                const conn = peer.connect(hostId);
+                conn.on('open', () => { startCall(hostId); });
+
+                peer.on('error', (err) => {
+                    if(err.type === 'peer-unavailable') {
+                        peer.destroy();
+                        peer = new Peer(hostId, {
+                            config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' } ] }
+                        });
+                        peer.on('open', () => {
+                            setupMedia();
+                            statusEl.innerText = "SİSTEM KURULDU. BAĞLANTI BEKLENİYOR...";
+                            statusEl.style.color = "#0ff";
+                        });
+                        peer.on('call', (call) => {
+                            call.answer(localStream);
+                            call.on('stream', (remoteStream) => {
+                                document.getElementById('remoteAudio').srcObject = remoteStream;
+                                statusEl.innerText = "ŞİFRELİ BAĞLANTI KURULDU!";
+                            });
+                        });
+                    }
+                });
+            });
+        }
+
+        function setupMedia(callback) {
+            navigator.mediaDevices.getUserMedia(audioConstraints)
+                .then((stream) => {
+                    localStream = stream;
+                    document.getElementById('controlsScreen').style.display = 'block';
+                    visualizer.style.display = 'block';
+                    startVisualizer(stream);
+                    if(callback) callback();
+                })
+                .catch((err) => { alert("Mikrofon erişimi reddedildi!"); });
+        }
+
+        function startCall(remoteId) {
+            setupMedia(() => {
+                const call = peer.call(remoteId, localStream);
+                call.on('stream', (remoteStream) => {
+                    document.getElementById('remoteAudio').srcObject = remoteStream;
+                    statusEl.innerText = "ŞİFRELİ BAĞLANTI KURULDU!";
+                    statusEl.style.color = "#0ff";
+                });
+            });
+        }
+
+        function startVisualizer(stream) {
+            if(!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const source = audioContext.createMediaStreamSource(stream);
+            const analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256;
+            source.connect(analyser);
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function draw() {
+                requestAnimationFrame(draw);
+                analyser.getByteFrequencyData(dataArray);
+                canvasCtx.fillStyle = '#0b0f19';
+                canvasCtx.fillRect(0, 0, visualizer.width, visualizer.height);
+                const barWidth = (visualizer.width / bufferLength) * 2.5;
+                let barHeight;
+                let x = 0;
+
+                for(let i = 0; i < bufferLength; i++) {
+                    barHeight = dataArray[i] / 4;
+                    canvasCtx.fillStyle = `rgb(0, ${barHeight + 100}, 255)`;
+                    canvasCtx.fillRect(x, visualizer.height - barHeight, barWidth, barHeight);
+                    x += barWidth + 1;
+                }
+            }
+            draw();
+        }
+
+        function toggleMute() {
+            if(!localStream) return;
+            isMuted = !isMuted;
+            localStream.getAudioTracks()[0].enabled = !isMuted;
+            
+            const statusTxt = document.getElementById('micStatus');
+            const btn = document.getElementById('muteBtn');
+            
+            if(isMuted) {
+                playSound('off');
+                statusTxt.innerText = "DEVRE DIŞI";
+                statusTxt.style.color = "#ff0055";
+                statusTxt.style.textShadow = "0 0 8px #ff0055";
+                btn.innerText = "Mikrofonu Aç (M)";
+                btn.style.borderColor = "#0ff";
+                btn.style.color = "#0ff";
             } else {
-                osc.frequency.setValueAtTime(300, ctx.currentTime);
-                gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                osc.start(); osc.stop(ctx.currentTime + 0.15);
+                playSound('on');
+                statusTxt.innerText = "AKTİF";
+                statusTxt.style.color = "#0ff";
+                statusTxt.style.textShadow = "0 0 8px #0ff";
+                btn.innerText = "Mikrofonu Kapat (M)";
+                btn.style.borderColor = "#ff0055";
+                btn.style.color = "#ff0055";
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if(e.target.tagName === 'INPUT') return; 
+            if(e.code === 'KeyM') toggleMute();
+            if(e.code === 'KeyV' && isMuted && !isPttActive) {
+                isPttActive = true;
+                localStream.getAudioTracks()[0].enabled = true;
+                playSound('on');
+                document.getElementById('micStatus').innerText = "TELSİZ AKTİF";
+                document.getElementById('micStatus').style.color = "#ff00ff";
+                document.getElementById('micStatus').style.textShadow = "0 0 8px #ff00ff";
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if(e.code === 'KeyV' && isMuted && isPttActive) {
+                isPttActive = false;
+                localStream.getAudioTracks()[0].enabled = false;
+                playSound('off');
+                document.getElementById('micStatus').innerText = "DEVRE DIŞI";
+                document.getElementById('micStatus').style.color = "#ff0055";
+                document.getElementById('micStatus').style.textShadow = "0 0 8px #ff0055";
+            }
+        });
+    </script>
+</body>
+</html>

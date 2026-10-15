@@ -21,7 +21,7 @@
             overflow: hidden;
             background-image: radial-gradient(circle at center, #0f172a 0%, #060913 100%);
             padding: 15px;
-            user-select: none; /* Mobilde butona basılı tutarken metin seçimini engeller */
+            user-select: none; 
             -webkit-user-select: none;
         }
 
@@ -38,7 +38,6 @@
             position: relative;
         }
 
-        /* Siber Köşebentler (Estetik) */
         .hud-container::before, .hud-container::after {
             content: ''; position: absolute; width: 15px; height: 15px; border: 2px solid #0ff;
         }
@@ -55,7 +54,7 @@
 
         .description { font-size: 14px; color: #8a9fc4; margin-bottom: 20px; }
 
-        input {
+        input[type="text"] {
             width: 100%;
             padding: 14px;
             background: rgba(0, 255, 255, 0.03);
@@ -69,7 +68,7 @@
             margin-bottom: 15px;
             transition: 0.3s;
         }
-        input:focus { border-color: #0ff; box-shadow: 0 0 10px rgba(0, 255, 255, 0.3); }
+        input[type="text"]:focus { border-color: #0ff; box-shadow: 0 0 10px rgba(0, 255, 255, 0.3); }
 
         button {
             width: 100%;
@@ -95,7 +94,6 @@
         .btn-danger { border-color: #ff0055; color: #ff0055; }
         .btn-danger:active, .btn-danger:hover { background: rgba(255, 0, 85, 0.1); box-shadow: 0 0 15px rgba(255, 0, 85, 0.4); }
 
-        /* Yeni Mobil Bas-Konuş Butonu Stili (Turuncu Neon) */
         .btn-ptt { border-color: #ffaa00; color: #ffaa00; margin-top: 5px;}
         .btn-ptt.active-ptt { background: rgba(255, 170, 0, 0.2); box-shadow: 0 0 15px rgba(255, 170, 0, 0.6); color: #fff;}
 
@@ -107,7 +105,7 @@
             width: 100%;
             height: 50px;
             background: rgba(0, 0, 0, 0.4);
-            border: 1px solid #005577; /* Sınıf adı hatası düzeltildi: id -> solid */
+            border: 1px solid #005577; 
             border-radius: 6px;
             margin-bottom: 15px;
             display: none;
@@ -125,13 +123,18 @@
         }
         .info-box span { color: #0ff; font-weight: bold; }
 
-        /* Mobil Optimizasyonları */
+        /* Yeni: Kullanıcı Listesi ve Ses Slider Tasarımları */
+        #usersPanel { margin-top: 15px; background: rgba(0, 255, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(0, 255, 255, 0.15); text-align: left;}
+        .user-item { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 6px; border: 1px solid #005577; }
+        .user-item input[type=range] { width: 80px; height: 4px; appearance: none; background: rgba(0,255,255,0.2); border-radius: 2px; outline: none; margin: 0; }
+        .user-item input[type=range]::-webkit-slider-thumb { appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #0ff; cursor: pointer; box-shadow: 0 0 5px #0ff; }
+
         @media (max-height: 600px) {
             body { padding: 5px; }
             .hud-container { padding: 15px; }
             h1 { margin-bottom: 8px; font-size: 20px; }
             .description { margin-bottom: 10px; font-size: 12px; }
-            input, button { padding: 10px; font-size: 14px; }
+            input[type="text"], button { padding: 10px; font-size: 14px; }
         }
     </style>
 </head>
@@ -142,6 +145,7 @@
         <p class="description">Mobil Uyumlu & Sesli Sohbet Ağı</p>
         
         <div id="setupScreen">
+            <input type="text" id="usernameInput" placeholder="KULLANICI ADINIZ" autocomplete="off">
             <input type="text" id="roomName" placeholder="ODA ADINI YAZIN" autocomplete="off">
             <button onclick="joinRoom()">ODAYA BAĞLAN</button>
         </div>
@@ -152,18 +156,20 @@
         <div id="controlsScreen" class="controls">
             <p style="margin-bottom: 12px; font-size: 16px;">MİKROFON: <span id="micStatus" style="color: #0ff; text-shadow: 0 0 5px #0ff;">AKTİF</span></p>
             <button id="muteBtn" onclick="toggleMute()" class="btn-danger">Mikrofonu Kapat (M)</button>
+            <button id="pttBtn" class="btn-ptt">BAS KONUŞ (BASILI TUT)</button>
             
-            <!-- YENİ MOBİL TELSİZ BUTONU -->
-            <button id="pttBtn" class="btn-ptt">BAS KONUŞ(BASILI TUT)</button>
-            
+            <!-- Yeni: Odadakiler Paneli -->
+            <div id="usersPanel">
+                <p style="font-size: 14px; font-weight: bold; color: #0ff; margin-bottom: 5px;">👥 ODADAKİLER (<span id="userCount">1</span>)</p>
+                <div id="usersList"></div>
+            </div>
+
             <div class="info-box">
                 <p>🎙️ <b>Gürültü Filtresi:</b> Aktif (300-3400Hz Bant Sınırlayıcı + Noise Gate)</p>
-                <p style="margin-top: 5px;">⌨️ <b>Kısayollar:</b></p>
+                <p style="margin-top: 5px;">⌨️ <b>Masaüstü Kısayolları:</b></p>
                 <p><span>[M]</span> Sustur | <span>[V]</span> Bas-Konuş</p>
             </div>
         </div>
-
-        <audio id="remoteAudio" autoplay></audio>
     </div>
 
     <script>
@@ -174,11 +180,14 @@
         let audioCtx;
         let biquadFilter;
         let gainNode;
+        let muteGainNode; // Yeni: Gecikmeyi çözen yazılımsal susturucu
+        let myUsername = "";
+        let remoteUsers = {}; // Bağlı kişileri ve ses ayarlarını tutar
 
         const statusEl = document.getElementById('status');
         const visualizer = document.getElementById('visualizer');
         const canvasCtx = visualizer.getContext('2d');
-        const pttBtn = document.getElementById('pttBtn'); // Yeni buton referansı eklendi
+        const pttBtn = document.getElementById('pttBtn');
 
         function playSound(type) {
             try {
@@ -194,108 +203,182 @@
             } catch(e) {}
         }
 
-        // WebRTC Temel Ayarları
         const audioConstraints = {
             audio: {
                 echoCancellation: true,
                 noiseSuppression: true,
-                autoGainControl: false, // Kaliteyi boğmaması için kapatıldı
-                channelCount: 1 // Bant genişliği tasarrufu ve odaklanmış ses için mono
+                autoGainControl: false, 
+                channelCount: 1 
             },
             video: false
         };
 
         function joinRoom() {
+            myUsername = document.getElementById('usernameInput').value.trim();
             const roomInput = document.getElementById('roomName').value.trim().toLowerCase();
+            
+            if(!myUsername) return alert("Lütfen bir kullanıcı adı girin!");
             if(!roomInput) return alert("Lütfen bir oda adı girin!");
 
             document.getElementById('setupScreen').style.display = 'none';
             statusEl.innerText = "SİSTEME BAĞLANILIYOR...";
             statusEl.style.color = "#0ff";
 
-            const hostId = "nxy-mobil-" + roomInput; 
+            const hostId = "nxy-mobil-v7-" + roomInput; 
             
-            peer = new Peer({
-                config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' } ] }
-            });
+            peer = new Peer({ config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' } ] } });
 
             peer.on('open', (id) => {
+                // Veri kanalı üzerinden isim gönderme (Müşteri -> Oda Sahibi)
                 const conn = peer.connect(hostId);
-                conn.on('open', () => { startCall(hostId); });
+                conn.on('open', () => { conn.send({type: 'name', name: myUsername}); });
+                conn.on('data', (data) => { if(data.type === 'name') updateUserName(conn.peer, data.name); });
 
-                peer.on('error', (err) => {
-                    if(err.type === 'peer-unavailable') {
-                        peer.destroy();
-                        peer = new Peer(hostId, {
-                            config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' } ] }
-                        });
-                        peer.on('open', () => {
-                            setupMedia();
+                conn.on('error', () => {}); // Hataları yoksay
+
+                const call = peer.call(hostId, localStream, { metadata: { username: myUsername } });
+                
+                if (call) {
+                    handleCall(call, hostId, "Oda Sahibi");
+                } else {
+                    // Odaya ilk giren bizsek (Oda Sahibiyiz)
+                    peer.destroy();
+                    peer = new Peer(hostId, { config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' } ] } });
+                    
+                    peer.on('open', () => {
+                        setupMedia(() => {
                             statusEl.innerText = "BAĞLANTI BEKLENİYOR...";
                             statusEl.style.color = "#0ff";
+                            renderUserList();
                         });
-                        peer.on('call', (call) => {
-                            call.answer(localStream);
-                            call.on('stream', (remoteStream) => {
-                                document.getElementById('remoteAudio').srcObject = remoteStream;
-                                statusEl.innerText = "BAĞLANTI AKTİF!";
-                            });
-                        });
-                    }
+                    });
+
+                    // Veri kanalı (Oda Sahibi -> Müşteri İsim Gönderimi)
+                    peer.on('connection', (inConn) => {
+                        inConn.on('data', (data) => { if(data.type === 'name') updateUserName(inConn.peer, data.name); });
+                        inConn.on('open', () => { inConn.send({type: 'name', name: myUsername}); });
+                    });
+
+                    // Gelen Aramaları Yanıtlama
+                    peer.on('call', (incomingCall) => {
+                        incomingCall.answer(localStream);
+                        let callerName = incomingCall.metadata ? incomingCall.metadata.username : "Bağlanıyor...";
+                        handleCall(incomingCall, incomingCall.peer, callerName);
+                    });
+                }
+            });
+        }
+
+        // Aramaları Yönetme ve Kişiye Özel Ses Yükseltici Oluşturma
+        function handleCall(call, peerId, defaultName) {
+            setupMedia(() => {
+                call.on('stream', (remoteStream) => {
+                    if(remoteUsers[peerId] && remoteUsers[peerId].stream === remoteStream) return;
+
+                    // Gelen sesi alıp %300'e kadar yükseltilebilecek bir GainNode'a bağlıyoruz
+                    const remoteSource = audioCtx.createMediaStreamSource(remoteStream);
+                    const remoteGain = audioCtx.createGain();
+                    remoteGain.gain.value = 1.0; // Standart %100 ses seviyesi
+                    
+                    remoteSource.connect(remoteGain);
+                    remoteGain.connect(audioCtx.destination); // Sesi hoparlöre aktar
+
+                    // Tarayıcı bug'ı için gizli ve sessiz bir HTML Audio elementi
+                    const dummyAudio = document.createElement('audio');
+                    dummyAudio.autoplay = true; dummyAudio.muted = true;
+                    dummyAudio.srcObject = remoteStream;
+
+                    remoteUsers[peerId] = {
+                        stream: remoteStream,
+                        gainNode: remoteGain,
+                        audioEl: dummyAudio,
+                        name: defaultName
+                    };
+                    
+                    statusEl.innerText = "BAĞLANTI AKTİF!";
+                    renderUserList();
+                });
+
+                call.on('close', () => {
+                    delete remoteUsers[peerId];
+                    renderUserList();
                 });
             });
         }
 
+        function updateUserName(peerId, name) {
+            if(remoteUsers[peerId]) {
+                remoteUsers[peerId].name = name;
+                renderUserList();
+            }
+        }
+
+        // Odadakileri ve Ses Slider'larını Ekrana Çizme
+        function renderUserList() {
+            const list = document.getElementById('usersList');
+            const count = document.getElementById('userCount');
+            list.innerHTML = "";
+            let total = 1; // Biz dahil
+            
+            for(let id in remoteUsers) {
+                total++;
+                const u = remoteUsers[id];
+                const div = document.createElement('div');
+                div.className = "user-item";
+                
+                // min=0 (Sessiz), max=3 (%300 Ses)
+                div.innerHTML = `
+                    <span style="color: #fff; font-size: 14px; font-weight: bold;">👤 ${u.name}</span>
+                    <input type="range" min="0" max="3" step="0.1" value="${u.gainNode.gain.value}" title="Ses Seviyesi (0% - 300%)">
+                `;
+                
+                div.querySelector('input').oninput = (e) => {
+                    u.gainNode.gain.value = parseFloat(e.target.value);
+                };
+                list.appendChild(div);
+            }
+            count.innerText = total;
+        }
+
         function setupMedia(callback) {
+            if(localStream) { if(callback) callback(); return; } // Zaten kuruluysa tekrar kurma
+
             navigator.mediaDevices.getUserMedia(audioConstraints)
                 .then((stream) => {
-                    // Sesi filtrelemek için AudioContext başlatıyoruz
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    // latencyHint: 'interactive' kulaklık gecikmesini (buffer) minimize eder
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
                     const source = audioCtx.createMediaStreamSource(stream);
                     
-                    // AGRESİF GÜRÜLTÜ FİLTRELEME (BiquadFilter)
-                    // İnsan sesinin dışındaki tüm alt/üst gürültüleri (Klavye, tıkırtı, fan) kırpar
                     biquadFilter = audioCtx.createBiquadFilter();
-                    biquadFilter.type = "bandpass"; // Sadece belirli frekansları geçirir
-                    biquadFilter.frequency.value = 1850; // İnsan sesinin merkezi (300-3400Hz ortası)
-                    biquadFilter.Q.value = 0.55; // Filtre genişliği (doğal ses ve sert filtre dengesi)
+                    biquadFilter.type = "bandpass"; 
+                    biquadFilter.frequency.value = 1850; 
+                    biquadFilter.Q.value = 0.55; 
 
-                    // Gürültü Eşiği (Noise Gate)
-                    // Belirli bir ses seviyesinin (fısıltı/tıkırtı) altındaki sesleri tamamen keser
                     gainNode = audioCtx.createGain();
                     gainNode.gain.value = 1.0; 
 
-                    // Zinciri birbirine bağlıyoruz
+                    // YENİ: 1 Saniyelik Kulaklık Gecikmesini ve Ses Tonu Değişimini Çözen Düğüm
+                    muteGainNode = audioCtx.createGain();
+                    muteGainNode.gain.value = 1.0;
+
                     source.connect(biquadFilter);
                     biquadFilter.connect(gainNode);
+                    gainNode.connect(muteGainNode);
 
-                    // Yeni, filtrelenmiş yayını (stream) oluşturuyoruz
                     const destination = audioCtx.createMediaStreamDestination();
-                    gainNode.connect(destination);
+                    muteGainNode.connect(destination);
                     localStream = destination.stream;
 
                     document.getElementById('controlsScreen').style.display = 'block';
                     visualizer.style.display = 'block';
                     
-                    startVisualizer(biquadFilter); // Dalgaları filtrelenmiş sese göre göster
+                    startVisualizer(biquadFilter); 
                     
                     if(callback) callback();
                 })
                 .catch((err) => { alert("Mikrofon izni şart!"); });
         }
 
-        function startCall(remoteId) {
-            setupMedia(() => {
-                const call = peer.call(remoteId, localStream);
-                call.on('stream', (remoteStream) => {
-                    document.getElementById('remoteAudio').srcObject = remoteStream;
-                    statusEl.innerText = "BAĞLANTI AKTİF!";
-                    statusEl.style.color = "#0ff";
-                });
-            });
-        }
-
-        // Dinamik Dalga Gösterici
         function startVisualizer(audioNode) {
             const analyser = audioCtx.createAnalyser();
             analyser.fftSize = 128;
@@ -313,21 +396,21 @@
                 let barHeight;
                 let x = 0;
 
-                // Gelişmiş Dinamik Noise Gate (Çok hafif sesleri filtrele ve görselde de sustur)
                 let maxVolume = 0;
                 for(let i = 0; i < bufferLength; i++) {
                     if(dataArray[i] > maxVolume) maxVolume = dataArray[i];
                 }
 
-                // Eşik seviyesi (Sayı büyüdükçe filtre sertleşir)
                 if (maxVolume < 45) {
-                    gainNode.gain.value = 0.0; // Kapı kapandı, ses tamamen kesildi
+                    gainNode.gain.value = 0.0; 
                 } else {
-                    gainNode.gain.value = 1.0; // Konuşuyor, kapı açıldı
+                    gainNode.gain.value = 1.0; 
                 }
 
                 for(let i = 0; i < bufferLength; i++) {
-                    barHeight = (gainNode.gain.value === 0) ? 0 : dataArray[i] / 3.5;
+                    // Mute yapıldığında ekrandaki dalgayı da düz çizgiye çeker
+                    let v = (muteGainNode.gain.value === 0 || gainNode.gain.value === 0) ? 0 : dataArray[i] / 3.5;
+                    barHeight = v;
                     canvasCtx.fillStyle = `rgb(0, ${barHeight + 100}, 255)`;
                     canvasCtx.fillRect(x, visualizer.height - barHeight, barWidth - 1, barHeight);
                     x += barWidth;
@@ -340,8 +423,9 @@
             if(!localStream) return;
             isMuted = !isMuted;
             
-            // Filtrelenmiş yayını aç-kapa yapıyoruz
-            localStream.getAudioTracks()[0].enabled = !isMuted;
+            // YENİ: Akış (Stream) asla kapanmaz, sesi yazılımla %0'a indiririz.
+            // Bu sayede Bluetooth kulaklıklar uyku moduna geçmez ve gecikme yaşanmaz!
+            muteGainNode.gain.value = isMuted ? 0.0 : 1.0;
             
             const statusTxt = document.getElementById('micStatus');
             const btn = document.getElementById('muteBtn');
@@ -359,12 +443,11 @@
             }
         }
 
-        // --- YENİ EKLENEN MOBİL DOKUNMATİK BAS-KONUŞ FONKSİYONLARI ---
         function startPtt(e) {
             if(e) e.preventDefault();
             if(isMuted && !isPttActive && localStream) {
                 isPttActive = true;
-                localStream.getAudioTracks()[0].enabled = true;
+                muteGainNode.gain.value = 1.0; // Basınca sesi aç (Gecikmesiz)
                 playSound('on');
                 document.getElementById('micStatus').innerText = "KONUŞUYOR (V)";
                 document.getElementById('micStatus').style.color = "#ffaa00";
@@ -376,7 +459,7 @@
             if(e) e.preventDefault();
             if(isMuted && isPttActive && localStream) {
                 isPttActive = false;
-                localStream.getAudioTracks()[0].enabled = false;
+                muteGainNode.gain.value = 0.0; // Bırakınca sesi kapat
                 playSound('off');
                 document.getElementById('micStatus').innerText = "KAPALI";
                 document.getElementById('micStatus').style.color = "#ff0055";
@@ -384,28 +467,24 @@
             }
         }
 
-        // Telsiz Butonu Mobil (Dokunmatik) Kontrolleri
         pttBtn.addEventListener('touchstart', startPtt, {passive: false});
         pttBtn.addEventListener('touchend', stopPtt);
         pttBtn.addEventListener('touchcancel', stopPtt);
         
-        // Telsiz Butonu PC (Mouse) Kontrolleri
         pttBtn.addEventListener('mousedown', startPtt);
         window.addEventListener('mouseup', stopPtt);
 
-
-        // Kısayollar (Sadece Masaüstünde Çalışır)
         document.addEventListener('keydown', (e) => {
             if(e.target.tagName === 'INPUT') return; 
             if(e.code === 'KeyM') toggleMute();
             if(e.code === 'KeyV' && isMuted && !isPttActive) {
-                startPtt(); // Yeni eklenen fonksiyonu tetikler
+                startPtt(); 
             }
         });
 
         document.addEventListener('keyup', (e) => {
             if(e.code === 'KeyV' && isMuted && isPttActive) {
-                stopPtt(); // Yeni eklenen fonksiyonu tetikler
+                stopPtt(); 
             }
         });
     </script>

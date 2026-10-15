@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NXY SESLİ</title>
+    <title>Nxy Sesli Sohbet | Mobil & Dijital</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap');
@@ -23,35 +23,41 @@
             padding: 15px;
         }
 
-        /* İstediğin Şeffaf, Neon ve Buzlu Cam Tasarım */
         .hud-container {
-            background: rgba(10, 15, 30, 0.45);
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.15), inset 0 0 20px rgba(0, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(10, 15, 30, 0.9);
+            border: 2px solid #0ff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2), inset 0 0 15px rgba(0, 255, 255, 0.05);
             border-radius: 16px;
-            padding: 40px 25px;
+            padding: 30px 20px;
             width: 100%;
             max-width: 400px;
             text-align: center;
+            backdrop-filter: blur(10px);
+            position: relative;
         }
+
+        /* Siber Köşebentler (Estetik) */
+        .hud-container::before, .hud-container::after {
+            content: ''; position: absolute; width: 15px; height: 15px; border: 2px solid #0ff;
+        }
+        .hud-container::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; border-top-left-radius: 16px; }
+        .hud-container::after { bottom: -2px; right: -2px; border-left: 0; border-top: 0; border-bottom-right-radius: 16px; }
 
         h1 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 26px;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px #0ff;
+            font-size: 24px;
+            margin-bottom: 15px;
+            text-shadow: 0 0 8px #0ff;
             letter-spacing: 2px;
         }
 
-        .description { font-size: 14px; color: #8a9fc4; margin-bottom: 25px; }
+        .description { font-size: 14px; color: #8a9fc4; margin-bottom: 20px; }
 
         input {
             width: 100%;
             padding: 14px;
-            background: rgba(0, 255, 255, 0.05);
-            border: 1px solid rgba(0, 255, 255, 0.4);
+            background: rgba(0, 255, 255, 0.03);
+            border: 1px solid #005577;
             color: #fff;
             font-family: 'Orbitron', sans-serif;
             font-size: 16px;
@@ -61,65 +67,73 @@
             margin-bottom: 15px;
             transition: 0.3s;
         }
-        input:focus { border-color: #0ff; box-shadow: 0 0 15px rgba(0, 255, 255, 0.4); background: rgba(0, 255, 255, 0.1); }
+        input:focus { border-color: #0ff; box-shadow: 0 0 10px rgba(0, 255, 255, 0.3); }
 
         button {
             width: 100%;
             padding: 14px;
             font-family: 'Orbitron', sans-serif;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             cursor: pointer;
-            background: rgba(0, 255, 255, 0.05);
+            background: transparent;
             color: #0ff;
-            border: 1px solid #0ff;
+            border: 2px solid #0ff;
             border-radius: 8px;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 10px;
         }
         button:active, button:hover {
-            background: rgba(0, 255, 255, 0.2);
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
         }
 
         .btn-danger { border-color: #ff0055; color: #ff0055; }
-        .btn-danger:active, .btn-danger:hover { background: rgba(255, 0, 85, 0.15); box-shadow: 0 0 15px rgba(255, 0, 85, 0.5); }
+        .btn-danger:active, .btn-danger:hover { background: rgba(255, 0, 85, 0.1); box-shadow: 0 0 15px rgba(255, 0, 85, 0.4); }
 
-        #status { font-size: 15px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; height: 20px;}
+        #status { font-size: 15px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; }
         
         .controls { display: none; margin-top: 15px; }
         
-        /* Tamamen Şeffaf Dalga Gösterici Ekranı */
         canvas {
             width: 100%;
-            height: 70px;
-            background: transparent;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px id #005577;
+            border-radius: 6px;
             margin-bottom: 15px;
             display: none;
         }
 
         .info-box {
-            background: rgba(0, 255, 255, 0.03);
+            background: rgba(0, 255, 255, 0.02);
             border-left: 3px solid #0ff;
-            padding: 15px;
+            padding: 12px;
             font-size: 13px;
             text-align: left;
-            color: #8a9fc4;
-            margin-top: 20px;
-            line-height: 1.5;
-            border-radius: 0 8px 8px 0;
+            color: #7b8ea3;
+            margin-top: 15px;
+            line-height: 1.4;
         }
         .info-box span { color: #0ff; font-weight: bold; }
 
+        /* Mobil Optimizasyonları */
+        @media (max-height: 600px) {
+            body { padding: 5px; }
+            .hud-container { padding: 15px; }
+            h1 { margin-bottom: 8px; font-size: 20px; }
+            .description { margin-bottom: 10px; font-size: 12px; }
+            input, button { padding: 10px; font-size: 14px; }
+        }
     </style>
 </head>
 <body>
 
     <div class="hud-container">
         <h1>NXY SESLİ</h1>
-        <p class="description">Saf Ses & Şeffaf Arayüz</p>
+        <p class="description">Mobil Uyumlu & Agresif Gürültü Filtreli Bağlantı Hub'ı</p>
         
         <div id="setupScreen">
             <input type="text" id="roomName" placeholder="ODA ADINI YAZIN" autocomplete="off">
@@ -130,12 +144,13 @@
         <canvas id="visualizer"></canvas>
 
         <div id="controlsScreen" class="controls">
-            <p style="margin-bottom: 15px; font-size: 16px;">MİKROFON: <span id="micStatus" style="color: #0ff; text-shadow: 0 0 8px #0ff;">AKTİF</span></p>
-            <button id="muteBtn" onclick="toggleMute()" class="btn-danger">MİKROFONU KAPAT (M)</button>
+            <p style="margin-bottom: 12px; font-size: 16px;">MİKROFON: <span id="micStatus" style="color: #0ff; text-shadow: 0 0 5px #0ff;">AKTİF</span></p>
+            <button id="muteBtn" onclick="toggleMute()" class="btn-danger">Mikrofonu Kapat (M)</button>
             
             <div class="info-box">
-                <p>🎙️ <b>Filtre:</b> Özel Bandpass (1850Hz) + Noise Gate</p>
-                <p style="margin-top: 5px;">⌨️ <b>Kısayollar:</b> <span>[M]</span> Sustur | <span>[V]</span> Bas-Konuş</p>
+                <p>🎙️ <b>Gürültü Filtresi:</b> Aktif (300-3400Hz Bant Sınırlayıcı + Noise Gate)</p>
+                <p style="margin-top: 5px;">⌨️ <b>Masaüstü Kısayolları:</b></p>
+                <p><span>[M]</span> Sustur | <span>[V]</span> Bas-Konuş</p>
             </div>
         </div>
 
@@ -169,13 +184,13 @@
             } catch(e) {}
         }
 
-        // SENİN KUSURSUZ SES AYARLARIN (HİÇ DOKUNULMADI)
+        // WebRTC Temel Ayarları
         const audioConstraints = {
             audio: {
                 echoCancellation: true,
                 noiseSuppression: true,
-                autoGainControl: false, 
-                channelCount: 1 
+                autoGainControl: false, // Kaliteyi boğmaması için kapatıldı
+                channelCount: 1 // Bant genişliği tasarrufu ve odaklanmış ses için mono
             },
             video: false
         };
@@ -188,9 +203,11 @@
             statusEl.innerText = "SİSTEME BAĞLANILIYOR...";
             statusEl.style.color = "#0ff";
 
-            const hostId = "nxy-mobil-saf-" + roomInput; 
+            const hostId = "nxy-mobil-" + roomInput; 
             
-            peer = new Peer({ config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' } ] } });
+            peer = new Peer({
+                config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' } ] }
+            });
 
             peer.on('open', (id) => {
                 const conn = peer.connect(hostId);
@@ -199,7 +216,9 @@
                 peer.on('error', (err) => {
                     if(err.type === 'peer-unavailable') {
                         peer.destroy();
-                        peer = new Peer(hostId, { config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' } ] } });
+                        peer = new Peer(hostId, {
+                            config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' } ] }
+                        });
                         peer.on('open', () => {
                             setupMedia();
                             statusEl.innerText = "BAĞLANTI BEKLENİYOR...";
@@ -220,21 +239,27 @@
         function setupMedia(callback) {
             navigator.mediaDevices.getUserMedia(audioConstraints)
                 .then((stream) => {
+                    // Sesi filtrelemek için AudioContext başlatıyoruz
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                     const source = audioCtx.createMediaStreamSource(stream);
                     
-                    // SENİN KUSURSUZ BİQUAD FİLTREN (HİÇ DOKUNULMADI)
+                    // AGRESİF GÜRÜLTÜ FİLTRELEME (BiquadFilter)
+                    // İnsan sesinin dışındaki tüm alt/üst gürültüleri (Klavye, tıkırtı, fan) kırpar
                     biquadFilter = audioCtx.createBiquadFilter();
-                    biquadFilter.type = "bandpass"; 
-                    biquadFilter.frequency.value = 1850; 
-                    biquadFilter.Q.value = 0.55; 
+                    biquadFilter.type = "bandpass"; // Sadece belirli frekansları geçirir
+                    biquadFilter.frequency.value = 1850; // İnsan sesinin merkezi (300-3400Hz ortası)
+                    biquadFilter.Q.value = 0.55; // Filtre genişliği (doğal ses ve sert filtre dengesi)
 
+                    // Gürültü Eşiği (Noise Gate)
+                    // Belirli bir ses seviyesinin (fısıltı/tıkırtı) altındaki sesleri tamamen keser
                     gainNode = audioCtx.createGain();
                     gainNode.gain.value = 1.0; 
 
+                    // Zinciri birbirine bağlıyoruz
                     source.connect(biquadFilter);
                     biquadFilter.connect(gainNode);
 
+                    // Yeni, filtrelenmiş yayını (stream) oluşturuyoruz
                     const destination = audioCtx.createMediaStreamDestination();
                     gainNode.connect(destination);
                     localStream = destination.stream;
@@ -242,7 +267,7 @@
                     document.getElementById('controlsScreen').style.display = 'block';
                     visualizer.style.display = 'block';
                     
-                    startVisualizer(biquadFilter); 
+                    startVisualizer(biquadFilter); // Dalgaları filtrelenmiş sese göre göster
                     
                     if(callback) callback();
                 })
@@ -260,63 +285,43 @@
             });
         }
 
+        // Dinamik Dalga Gösterici
         function startVisualizer(audioNode) {
             const analyser = audioCtx.createAnalyser();
-            analyser.fftSize = 256;
+            analyser.fftSize = 128;
             audioNode.connect(analyser);
-
-            // Ses Motoru ve Görselliği Birbirinden Ayırdık!
             const bufferLength = analyser.frequencyBinCount;
-            const freqDataArray = new Uint8Array(bufferLength); // Kapı (Gate) için
-            const timeDataArray = new Uint8Array(bufferLength); // Dalga Çizgisi için
+            const dataArray = new Uint8Array(bufferLength);
 
             function draw() {
                 requestAnimationFrame(draw);
+                analyser.getByteFrequencyData(dataArray);
+                canvasCtx.fillStyle = '#060913';
+                canvasCtx.fillRect(0, 0, visualizer.width, visualizer.height);
                 
-                // Analizörden her iki veriyi de aynı anda çekiyoruz
-                analyser.getByteFrequencyData(freqDataArray); 
-                analyser.getByteTimeDomainData(timeDataArray);
-
-                // Görüntüyü temizle (Tamamen Şeffaf)
-                canvasCtx.clearRect(0, 0, visualizer.width, visualizer.height);
-
-                // --- 1. SENİN ORİJİNAL NOİSE GATE MANTIĞIN (Kusursuz Ses İçin) ---
-                let maxVolume = 0;
-                for(let i = 0; i < bufferLength; i++) {
-                    if(freqDataArray[i] > maxVolume) maxVolume = freqDataArray[i];
-                }
-                if (maxVolume < 45) {
-                    gainNode.gain.value = 0.0; // Kapıyı kapat
-                } else {
-                    gainNode.gain.value = 1.0; // Kapıyı aç
-                }
-
-                // --- 2. YENİ ŞIK VE CANLI DALGA GÖRÜNÜMÜ ---
-                canvasCtx.lineWidth = 3;
-                canvasCtx.strokeStyle = '#0ff';
-                canvasCtx.shadowBlur = 12;
-                canvasCtx.shadowColor = '#0ff';
-                canvasCtx.beginPath();
-
-                let sliceWidth = visualizer.width * 1.0 / bufferLength;
+                const barWidth = (visualizer.width / bufferLength) * 2;
+                let barHeight;
                 let x = 0;
 
+                // Gelişmiş Dinamik Noise Gate (Çok hafif sesleri filtrele ve görselde de sustur)
+                let maxVolume = 0;
                 for(let i = 0; i < bufferLength; i++) {
-                    // Eğer ses kapalıysa dalgayı düzelt, açıksa canlı dalga yap
-                    let v = (gainNode.gain.value === 0) ? 128 : timeDataArray[i];
-                    
-                    // Dalgayı biraz daha belirginleştirmek için genliği artır
-                    let genlik = (v - 128) * 2.5 + 128;
-                    let y = (genlik / 255.0) * visualizer.height;
-
-                    if(i === 0) canvasCtx.moveTo(x, y);
-                    else canvasCtx.lineTo(x, y);
-
-                    x += sliceWidth;
+                    if(dataArray[i] > maxVolume) maxVolume = dataArray[i];
                 }
-                
-                canvasCtx.lineTo(visualizer.width, visualizer.height / 2);
-                canvasCtx.stroke();
+
+                // Eşik seviyesi (Sayı büyüdükçe filtre sertleşir)
+                if (maxVolume < 45) {
+                    gainNode.gain.value = 0.0; // Kapı kapandı, ses tamamen kesildi
+                } else {
+                    gainNode.gain.value = 1.0; // Konuşuyor, kapı açıldı
+                }
+
+                for(let i = 0; i < bufferLength; i++) {
+                    barHeight = (gainNode.gain.value === 0) ? 0 : dataArray[i] / 3.5;
+                    canvasCtx.fillStyle = `rgb(0, ${barHeight + 100}, 255)`;
+                    canvasCtx.fillRect(x, visualizer.height - barHeight, barWidth - 1, barHeight);
+                    x += barWidth;
+                }
             }
             draw();
         }
@@ -324,6 +329,8 @@
         function toggleMute() {
             if(!localStream) return;
             isMuted = !isMuted;
+            
+            // Filtrelenmiş yayını aç-kapa yapıyoruz
             localStream.getAudioTracks()[0].enabled = !isMuted;
             
             const statusTxt = document.getElementById('micStatus');
@@ -333,21 +340,16 @@
                 playSound('off');
                 statusTxt.innerText = "KAPALI";
                 statusTxt.style.color = "#ff0055";
-                btn.innerText = "MİKROFONU AÇ (M)";
-                btn.style.borderColor = "#0ff";
-                btn.style.color = "#0ff";
-                btn.style.background = "rgba(0, 255, 255, 0.05)";
+                btn.innerText = "Mikrofonu Aç (M)";
             } else {
                 playSound('on');
                 statusTxt.innerText = "AKTİF";
                 statusTxt.style.color = "#0ff";
-                btn.innerText = "MİKROFONU KAPAT (M)";
-                btn.style.borderColor = "#ff0055";
-                btn.style.color = "#ff0055";
-                btn.style.background = "rgba(255, 0, 85, 0.05)";
+                btn.innerText = "Mikrofonu Kapat (M)";
             }
         }
 
+        // Kısayollar (Sadece Masaüstünde Çalışır)
         document.addEventListener('keydown', (e) => {
             if(e.target.tagName === 'INPUT') return; 
             if(e.code === 'KeyM') toggleMute();

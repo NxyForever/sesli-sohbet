@@ -20,49 +20,51 @@
             min-height: 100vh;
             overflow: hidden;
             background-image: radial-gradient(circle at center, #0f172a 0%, #060913 100%);
-            padding: 15px;
+            padding: 20px;
         }
 
+        /* Gerçek Şeffaf Buzlu Cam Tasarımı */
         .hud-container {
-            background: rgba(10, 15, 30, 0.4);
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            box-shadow: 0 8px 32px 0 rgba(0, 255, 255, 0.15), inset 0 0 20px rgba(0, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 16px;
+            background: rgba(0, 15, 30, 0.4);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            box-shadow: 0 10px 40px rgba(0, 255, 255, 0.1), inset 0 0 15px rgba(0, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 20px;
             padding: 40px 25px;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             text-align: center;
         }
 
         h1 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 26px;
-            margin-bottom: 20px;
-            text-shadow: 0 0 10px #0ff;
+            font-size: 28px;
+            margin-bottom: 25px;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
             letter-spacing: 2px;
+            color: #fff;
         }
 
         input {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             background: rgba(0, 255, 255, 0.05);
-            border: 1px solid rgba(0, 255, 255, 0.4);
+            border: 1px solid rgba(0, 255, 255, 0.3);
             color: #fff;
             font-family: 'Orbitron', sans-serif;
             font-size: 16px;
-            border-radius: 8px;
+            border-radius: 10px;
             outline: none;
             text-align: center;
             margin-bottom: 20px;
-            transition: 0.3s;
+            transition: all 0.3s ease;
         }
-        input:focus { border-color: #0ff; box-shadow: 0 0 15px rgba(0, 255, 255, 0.4); background: rgba(0, 255, 255, 0.1); }
+        input:focus { border-color: #0ff; box-shadow: 0 0 20px rgba(0, 255, 255, 0.3); background: rgba(0, 255, 255, 0.1); }
 
         button {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             font-family: 'Orbitron', sans-serif;
             font-size: 16px;
             font-weight: 700;
@@ -70,42 +72,46 @@
             background: rgba(0, 255, 255, 0.1);
             color: #0ff;
             border: 1px solid #0ff;
-            border-radius: 8px;
+            border-radius: 10px;
             transition: all 0.3s ease;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             margin-bottom: 15px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
         }
-        button:active, button:hover {
-            background: rgba(0, 255, 255, 0.25);
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+        button:active {
+            background: rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+            transform: scale(0.98);
         }
 
-        .btn-danger { border-color: #ff0055; color: #ff0055; background: rgba(255, 0, 85, 0.05); }
-        .btn-danger:active, .btn-danger:hover { background: rgba(255, 0, 85, 0.2); box-shadow: 0 0 20px rgba(255, 0, 85, 0.6); }
+        .btn-danger { border-color: #ff0055; color: #ff0055; background: rgba(255, 0, 85, 0.05); box-shadow: 0 0 10px rgba(255, 0, 85, 0.2); }
+        .btn-danger:active { background: rgba(255, 0, 85, 0.2); box-shadow: 0 0 25px rgba(255, 0, 85, 0.8); }
 
-        #status { font-size: 15px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; height: 20px; }
+        #status { font-size: 16px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; height: 20px; letter-spacing: 1px; color: #0ff; text-shadow: 0 0 8px #0ff;}
         
-        .controls { display: none; margin-top: 15px; }
+        .controls { display: none; margin-top: 10px; }
         
+        /* Canlı Dalga Ekranı */
         canvas {
             width: 100%;
-            height: 80px;
+            height: 100px;
             background: transparent;
-            margin-bottom: 15px;
+            margin: 10px 0 25px 0;
             display: none;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
         }
 
         .info-box {
             background: rgba(0, 255, 255, 0.03);
             border-left: 3px solid #0ff;
-            padding: 12px;
-            font-size: 13px;
+            padding: 15px;
+            font-size: 14px;
             text-align: left;
             color: #8a9fc4;
-            margin-top: 20px;
-            line-height: 1.5;
-            border-radius: 0 8px 8px 0;
+            margin-top: 25px;
+            line-height: 1.6;
+            border-radius: 0 10px 10px 0;
         }
         .info-box span { color: #0ff; font-weight: bold; }
 
@@ -125,11 +131,11 @@
         <canvas id="visualizer"></canvas>
 
         <div id="controlsScreen" class="controls">
-            <p style="margin-bottom: 15px; font-size: 16px;">MİKROFON: <span id="micStatus" style="color: #0ff; text-shadow: 0 0 8px #0ff;">AKTİF</span></p>
+            <p style="margin-bottom: 20px; font-size: 18px;">MİKROFON: <span id="micStatus" style="color: #0ff; text-shadow: 0 0 10px #0ff; font-weight: bold;">AKTİF</span></p>
             <button id="muteBtn" onclick="toggleMute()" class="btn-danger">MİKROFONU KAPAT (M)</button>
             
             <div class="info-box">
-                <p>🎙️ <b>Gürültü Filtresi:</b> Aktif (300-3400Hz Çiftli Filtre)</p>
+                <p>🎙️ <b>Ses Motoru:</b> Aktif (Saf Donanımsal HD Ses)</p>
                 <p style="margin-top: 5px;">⌨️ <b>Kısayollar:</b> <span>[M]</span> Sustur</p>
             </div>
         </div>
@@ -142,20 +148,17 @@
         let localStream;
         let isMuted = false;
         let audioCtx;
-        let gainNode;
-        let highpassFilter;
-        let lowpassFilter;
 
         const statusEl = document.getElementById('status');
         const visualizer = document.getElementById('visualizer');
         const canvasCtx = visualizer.getContext('2d');
 
+        // YAZILIMSAL FİLTRELER ÇIKARTILDI - SAF DONANIMSAL HD SES
         const audioConstraints = {
             audio: {
                 echoCancellation: true,
                 noiseSuppression: true,
-                autoGainControl: false, 
-                channelCount: 1 
+                autoGainControl: false // Sesin boğuklaşmasını engelleyen tek ve en önemli kural
             },
             video: false
         };
@@ -166,9 +169,8 @@
 
             document.getElementById('setupScreen').style.display = 'none';
             statusEl.innerText = "SİSTEME BAĞLANILIYOR...";
-            statusEl.style.color = "#0ff";
 
-            const hostId = "nxy-mobil-v5-" + roomInput; 
+            const hostId = "nxy-mobil-v6-" + roomInput; 
             
             peer = new Peer({ config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' } ] } });
 
@@ -183,7 +185,6 @@
                         peer.on('open', () => {
                             setupMedia();
                             statusEl.innerText = "BAĞLANTI BEKLENİYOR...";
-                            statusEl.style.color = "#0ff";
                         });
                         peer.on('call', (call) => {
                             call.answer(localStream);
@@ -200,35 +201,24 @@
         function setupMedia(callback) {
             navigator.mediaDevices.getUserMedia(audioConstraints)
                 .then((stream) => {
+                    // Sesi PeerJS'e TERTEMİZ, FİLTRESİZ gönderiyoruz (Kalite burada yatıyor)
+                    localStream = stream;
+
+                    // Görselleştirici için sadece kopyasını alıyoruz (Sesi bozmaz)
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                     const source = audioCtx.createMediaStreamSource(stream);
-                    
-                    // 1. Aşama: 300Hz Altını Kes (Kalın Uğultu ve Dip Sesler)
-                    highpassFilter = audioCtx.createBiquadFilter();
-                    highpassFilter.type = "highpass";
-                    highpassFilter.frequency.value = 300;
-
-                    // 2. Aşama: 3400Hz Üstünü Kes (İnce Tizler ve Tıkırtılar)
-                    lowpassFilter = audioCtx.createBiquadFilter();
-                    lowpassFilter.type = "lowpass";
-                    lowpassFilter.frequency.value = 3400;
-
-                    gainNode = audioCtx.createGain();
-                    gainNode.gain.value = 1.0; 
-
-                    // Filtreleri birbirine bağlıyoruz
-                    source.connect(highpassFilter);
-                    highpassFilter.connect(lowpassFilter);
-                    lowpassFilter.connect(gainNode);
-
-                    const destination = audioCtx.createMediaStreamDestination();
-                    gainNode.connect(destination);
-                    localStream = destination.stream;
+                    const analyser = audioCtx.createAnalyser();
+                    analyser.fftSize = 64; // Dalganın daha kalın ve yumuşak olması için düşürüldü
+                    source.connect(analyser); // Analyser'ı çıkışa bağlamıyoruz, sadece okuyoruz
 
                     document.getElementById('controlsScreen').style.display = 'block';
                     visualizer.style.display = 'block';
                     
-                    startVisualizer(lowpassFilter); 
+                    // Canvas çözünürlüğünü netleştir
+                    visualizer.width = visualizer.clientWidth;
+                    visualizer.height = visualizer.clientHeight;
+
+                    startVisualizer(analyser); 
                     
                     if(callback) callback();
                 })
@@ -245,64 +235,52 @@
             });
         }
 
-        // Akıcı, Yavaş ve Daha Şık Dalga Göstericisi (Smoothed Sine Wave)
-        function startVisualizer(audioNode) {
-            const analyser = audioCtx.createAnalyser();
-            analyser.fftSize = 512;
-            audioNode.connect(analyser);
+        // ÇOK DAHA CANLI, İÇİ DOLGULU NEON FREKANS DALGASI
+        function startVisualizer(analyser) {
             const bufferLength = analyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
-            
-            // Dalganın yavaş hareket etmesi için hafıza dizisi
-            const smoothData = new Float32Array(bufferLength);
-            for(let i=0; i<bufferLength; i++) smoothData[i] = 128;
 
             function draw() {
                 requestAnimationFrame(draw);
-                analyser.getByteTimeDomainData(dataArray);
+                analyser.getByteFrequencyData(dataArray); // Zaman verisi yerine Frekans verisi (Çok daha duyarlı)
                 
                 canvasCtx.clearRect(0, 0, visualizer.width, visualizer.height);
                 
-                canvasCtx.lineWidth = 3;
+                canvasCtx.lineWidth = 4;
                 canvasCtx.strokeStyle = '#0ff';
-                canvasCtx.shadowBlur = 12;
+                canvasCtx.shadowBlur = 15;
                 canvasCtx.shadowColor = '#0ff';
                 canvasCtx.beginPath();
 
                 let sliceWidth = visualizer.width * 1.0 / bufferLength;
                 let x = 0;
-                let maxVolume = 0;
 
                 for(let i = 0; i < bufferLength; i++) {
-                    // Interpolation (Yumuşatma): Yeni veriye aniden atlamak yerine yavaşça süzülerek geçer (0.15 hızı)
-                    smoothData[i] += (dataArray[i] - smoothData[i]) * 0.15;
+                    // Sesi ekrana orantılı yansıt
+                    let v = dataArray[i] / 255.0;
+                    let y = visualizer.height - (v * visualizer.height * 0.9);
 
-                    // Şiddeti artır (Canlılık için)
-                    let v = ((smoothData[i] - 128) * 3.5) + 128; 
-                    let y = (v / 128.0) * (visualizer.height / 2);
-
-                    // Sınırları taşmasını engelle
-                    if(y < 5) y = 5;
-                    if(y > visualizer.height - 5) y = visualizer.height - 5;
+                    // Çizgiyi asla tam dibe yapıştırma (Hafif bir taban kalsın)
+                    if(y > visualizer.height - 4) y = visualizer.height - 4;
 
                     if(i === 0) canvasCtx.moveTo(x, y);
                     else canvasCtx.lineTo(x, y);
 
                     x += sliceWidth;
-                    
-                    let volCalc = Math.abs(dataArray[i] - 128);
-                    if(volCalc > maxVolume) maxVolume = volCalc;
                 }
                 
-                canvasCtx.lineTo(visualizer.width, visualizer.height / 2);
-                canvasCtx.stroke();
+                canvasCtx.lineTo(visualizer.width, visualizer.height);
+                canvasCtx.lineTo(0, visualizer.height);
+                
+                // Alt tarafa çok şık bir şeffaf neon dolgu efekti
+                let gradient = canvasCtx.createLinearGradient(0, 0, 0, visualizer.height);
+                gradient.addColorStop(0, 'rgba(0, 255, 255, 0.3)');
+                gradient.addColorStop(1, 'rgba(0, 255, 255, 0)');
+                canvasCtx.fillStyle = gradient;
+                canvasCtx.fill();
 
-                // Düzeltilmiş Hassas Gürültü Kapısı (Eşik: 6) - Sesi asla yutmaz
-                if (maxVolume < 6) {
-                    gainNode.gain.value = 0.0; 
-                } else {
-                    gainNode.gain.value = 1.0; 
-                }
+                // Üstteki asıl çizgiyi çiz
+                canvasCtx.stroke();
             }
             draw();
         }
@@ -318,13 +296,15 @@
             if(isMuted) {
                 statusTxt.innerText = "KAPALI";
                 statusTxt.style.color = "#ff0055";
+                statusTxt.style.textShadow = "0 0 10px #ff0055";
                 btn.innerText = "MİKROFONU AÇ (M)";
                 btn.style.borderColor = "#0ff";
                 btn.style.color = "#0ff";
-                btn.style.background = "rgba(0, 255, 255, 0.05)";
+                btn.style.background = "rgba(0, 255, 255, 0.1)";
             } else {
                 statusTxt.innerText = "AKTİF";
                 statusTxt.style.color = "#0ff";
+                statusTxt.style.textShadow = "0 0 10px #0ff";
                 btn.innerText = "MİKROFONU KAPAT (M)";
                 btn.style.borderColor = "#ff0055";
                 btn.style.color = "#ff0055";
